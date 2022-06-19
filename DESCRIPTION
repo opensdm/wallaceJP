@@ -43,7 +43,7 @@ Imports:
   spocc (>= 0.8.0), 
   spThin, 
   zip,
-  shiny.18n
+  shiny.i18n
 Suggests: 
   knitr,
   rgbif (>= 3.3.0),
