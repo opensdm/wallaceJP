@@ -1,0 +1,325 @@
+en,ja
+Full model and partition bin average evaluation statistics,フルモデルとクロスバリデーションビンの平均評価統計量
+Individual partition bin evaluation statistics,個々のクロスバリデーションビンの評価統計量
+Maxent Lambdas File,Maxent Lambdasファイル
+Maxent Evaluation Plots,Maxent評価プロット
+Plot Response Curves,応答曲線のプロット
+Map Prediction,予測の地図化
+BIOCLIM Envelope Plots,BIOCLIMエンベローププロット
+Current Model,現在のモデル
+Current Env Variable,現在の環境変数
+predicted absence,予測された不在
+predicted presence,予測された在
+Predicted Suitability,予測された好適度
+Please install the rgdal package before downloading rasters.,ラスタのダウンロードの前にrgdalパッケージをインストールしてください。
+Reset projection extent.,投影範囲をリセットします。
+Obtain Occurrence Data,在地点データの取得
+Modules Available:,選択可能なモジュール:
+Query Database,データベース検索
+User-specified,ユーザー指定の
+Module: Query Database,モジュール: データベース検索
+Interface to Species Occurrence Data Sources,種の在データソースへのインターフェース
+Download database occurrence localities (.csv),データベースの在データ位置（.csv）をダウンロードする
+Download,ダウンロード
+Module: User-specified Occurrences,モジュール: ユーザー所有の在データ
+Load Occurrences,在データ読込
+Process Occurrence Data,在データの処理
+Select Occurrences On Map,地図上での在データの選択
+Remove Occurrences By ID,IDによる在データの除去
+Spatial Thin,空間的な在データの間引き
+Module: Select Occurrences On Map,モジュール: 地図上での在データの選択
+Extra functionality for 'leaflet' Package,'leaflet'パッケージの追加機能
+Select occurrences intersecting drawn polygon,描画したポリゴンと重なる在地点を選択
+: to begin drawing click hexagon icon on map toolbar and when complete. press 'Finish' and then the 'Select Occurrences' button),描画を開始するには、マップツールバーの六角形アイコンをクリックします。描画が終わったら、「完了」 ボタンを押してから 「在地点の選択」ボタンを押してください。)
+Select Occurrences,在地点を選択
+Module: Remove Occurrences By ID,IDによる在データの除去
+Remove Occurrence,在を削除
+Module: Spatial Thin,モジュール: 空間的な在データの間引き
+Spatial Thinning of Species Occurrence Records,種の在記録の空間的間引き
+Thin Occurrences,在地点のまびき
+Reset to original occurrences,在データを元のセットにリセットします。
+Reset,リセットします
+Download processed occurrence localities (.csv),処理された在位置のダウンロード（.csv）
+Obtain Environmental Data,環境データの取得
+Module: WorldClim Bioclims,モジュール: WorldClim Bioclims
+Geographic Data Analysis and Modeling,地理データの分析とモデリング
+Using map center coordinates as reference for tile download.,タイルのダウンロードに地図の中心座標を参照しています。
+Load Env Data,環境データ読込
+Module: User-specified Environmental Data,モジュール: ユーザー所有の環境データ
+Process Environmental Data,環境データの処理
+Select Study Region,分析範囲の選択
+Module: Select Study Region,モジュール: 分析範囲の選択
+Title Classes and Methods for Spatial Data,空間データのタイトルクラスとメソッド
+Interface to Geometry Engine - Open Source (GEOS),Geometry Engineへのインターフェース-オープンソース（GEOS）
+Step 1:,ステップ1:
+Choose Background Extent,背景の範囲を選択
+Select,選択
+Module: User-specified Study Region,モジュール: ユーザー指定の分析範囲
+Load,読み込み
+Step 2:,ステップ2: 
+Sample Background Points,サンプルの背景地点をサンプルします
+Mask predictor rasters by background extent and sample background points,背景範囲とサンプル背景ポイントによって予測ラスターをマスクします
+Sample,サンプル
+Select download file type,ダウンロードファイルのタイプを選択
+Download predictor rasters masked to background extent,背景範囲にマスクされた予測ラスタのダウンロード
+Partition Occurrence Data,在データの分割
+Non-spatial Partition,非空間的分割
+Spatial Partition,空間的分割
+Module: Spatial Partition,モジュール: 空間的分割
+Automated Runs and Evaluations of Ecological Niche Models,生態学的ニッチモデルの自動実行と評価
+Partition,分割
+Module: Non-spatial Partition,モジュール: 非空間的分割
+Download occurrence and background localities with partition values (.csv),分割グループ番号を含む在地点と背景地点のダウンロード(.csv)
+Build and Evaluate Niche Model,ニッチモデルの構築と評価
+Module: Maxent,モジュール: Maxent
+Automated Runs and Evaluations of Ecological Niche Models using Maxent GUI (Java),Maxent GUI（Java）を使用した生態学的ニッチモデルの自動実行と評価
+Species Distribution Modeling,種分布モデリング
+Fitting 'Maxent' Species Distribution Models with 'glmnet',「Maxent」種分布モデルを「glmnet」に適合させる
+: see module guidance for troubleshooting tips if you are experiencing problems.),: 問題がある場合は、モジュールガイダンスにあるトラブルシューティングを参照してください)。
+Run,実行
+Module: BIOCLIM,モジュール: BIOCLIM
+Download CSV,CSVをダウンロード
+Visualize Model Results,モデルの結果の可視化
+Module: BIOCLIM Envelope Plots,モジュール: BIOCLIMエンベローププロット
+Module: Maxent Evaluation Plots,モジュール: Maxent評価プロット
+Module: Response Curves,モジュール: 応答曲線
+Module: Map Prediction,モジュール: 予測の地図化
+Plot,プロット
+Download displayed raster,表示されたラスターをダウンロードする
+Project Model,モデルの投影
+Project to New Extent,新規範囲への投影
+Project to New Time,新規時点への投影
+Calculate Environmental Similarity,環境類似度の計算
+Module: Project to New Extent,モジュール: 新規範囲への投影
+Project model to new extent,新規範囲へのモデルの投影
+Using the polygon drawing tool,ポリゴン描画ツールの使用
+Project,投影
+Module: Project to New Time,モジュール: 新規時点への投影
+Project model to new time for current extent,現在の空間範囲の新規時点へのモデルの投影
+Module: Calculate Environmental Similarity,モジュール: 環境類似度の計算
+Calculate MESS for current extent,現在の空間範囲のMESS値の計算
+Calculate MESS,MESS値の計算
+Reset projection raster,投影ラスターをリセット
+Download Session Code,セッションコードのダウンロード
+Dynamic Documents for R,Rの動的ドキュメント
+A General-Purpose Package for Dynamic Report Generation in R,Rで動的レポートを生成するための汎用パッケージ
+***WELCOME TO WALLACE***,***WALLACEへようこそ***
+Please find messages for the user in this log window.,このログウィンドウでユーザーに対するメッセージを探してください。
+Checking for points with NA values...,NA値のポイントをチェックしています…
+No localities overlay with environmental predictors. All localities may be marine -- please redo with terrestrial occurrences.,環境予測変数が重なる地域はありません。すべての地域は海洋である可能性があります - 陸上の在をやり直してください。
+Removed records without environmental values with occIDs: ,occIDを持つ環境値のないレコードを削除しました：
+"Create binary map of predicted presence/absence assuming all values above threshold value represent presence. Also can be interpreted as a 'potential distribution' (see guidance).",予測された在/不在の二値マップを作成します。 閾値以上の値はすべて在を表します。「潜在的な分布」と解釈することもできます。（ガイダンスを参照）。
+Set threshold,閾値の設定
+No threshold,閾値がありません
+Minimum Training Presence,トレーニング用在地点の最小数
+10 Percentile Training Presence,トレーニング用在地点の10パーセンタイル点
+threshold selected: value =,閾値が選択されました：値 =
+Models must first be run in component 6.,モデルは最初に手順 6 で実行する必要があります。
+"Model prediction raster has undefined coordinate reference system (CRS), and thus cannot be mapped. This is likely due to undefined CRS's for input rasters. Please see guidance text for module 'User-specified Environmental Data' in component 'Obtain Environmental Data' for more details.",モデル予測ラスターには未定義の座標参照系 (CRS) があるため、マップできません。これは、入力ラスターの未定義のCRSが原因である可能性があります。詳細は手順 「環境データの取得」の、「ユーザー指定の環境変数」モジュールのガイダンスを参照ください。
+BIOCLIM model prediction plotted.,BIOCLIMモデルの予測をプロットしました。
+Select algorithm,アルゴリズムを選択します。
+Select feature classes ,フィーチャークラスの選択
+(flexibility of modeled response),（モデル化された応答の柔軟さ）
+"Feature combinations to be explored. Features are constructed using different relationships within and among the environmental predictors, and are used to constrain the computed probability distribution. In short, more features = more potential model complexity.",比較評価するフィーチャーの組み合わせ。フィーチャーは 環境変数内および変数間の関係も考慮して構築され、分布確率の算出に用いられます。つまり、フィーチャーが多ければ多いほど、モデルの潜在的により複雑になります。
+Select regularization multipliers ,正則化乗数の選択
+(penalty against complexity),(モデルの複雑さに対する罰則)
+Range of regularization multipliers to explore. Greater values of the regularization multiplier lead to increased penalty against overly complex and/or overfit models. A value of 0 results in no regularization.,比較評価する正則化乗数の範囲。正則化乗数の値が大きいほど過度に複雑なモデルや過剰適合モデルに対する罰則が大きくなる、値が0の場合、正則化は行われません。
+"Value used to step through regularization multiplier range (e.g. range of 1-3 with step 0.5 results in [1, 1.5, 2, 2.5, 3]).",比較評価する正則化乗数の値の間隔（たとえば、間隔0.5で1〜3の範囲は、[1、1.5、2、2.5、3]になります）。
+Multiplier step value,正則化乗数のステップ値
+Clamp model predictions?,モデルの予測値をクランピングしますか?
+Clamping?,クランピングしますか？
+"Before building a model, partition occurrences in component 5.",モデルを構築する前に、手順5で在地点を分割します。
+No feature classes selected.,フィーチャークラスが選択されていません。
+"Package rJava cannot load.Please download the latest version of Java, and make sure it is the correct version (e.g. 64-bit for a 64-bit system). After installing, try ""library(rJava)"". If it loads properly, restart Wallace and try again. If it does not, please consult www.github.com/wallaceecomod/wallace for more tips on getting rJava to work.",パッケージrJavaをロードできません。最新バージョンのJavaをダウンロードし、それが正しいバージョンであることを確認してください（たとえば、64ビットシステムの場合は64ビット）。インストール後、「library（rJava）」を試してください。正しく読み込まれる場合は、Wallaceを再起動して再試行してください。そうでない場合は、rJavaを機能させるためのヒントについて、www.github.com / wallaceecomod/wallaceを参照してください。
+Select feature classes first.,最初にフィーチャクラスを選択します。
+Please specify a positive multiplier step value that is greater than 0.,0より大きい正の乗数ステップ値を指定してください。
+Evaluating ENMs...,ENMsの評価...
+Select time period,時点の選択
+Select RCP,RCPの選択
+Select global circulation model,GCMを選択
+Calculate a model prediction in component 7 before projecting.,投影前に手順７でモデル予測を計算します。
+The polygon has not been drawn and finished. Please use the draw toolbar on the left-hand of the map to complete the polygon.,ポリゴンは描画および終了されていません。マップの左側にある描画ツールバーを使用して、ポリゴンを完成させてください。
+Select projection extent first.,まず投影範囲を選択してください。
+Project to New Time currently only available with resolutions >30 arc seconds.,新しい時点への投影は今のところ解像度が＞30秒です。
+This combination of GCM and RCP is not available. Please make a different selection.,このGCMとRCPの組み合わせは現在使用できません。別の選択をしてください。
+Clipping environmental data to current extent...,現在の範囲で環境データをクリッピングしています…
+Projecting to new time...,新規時点への投影
+Enter the record ID to be removed,削除するレコードIDを入力
+"Before processing occurrences, obtain the data in component 1.",在データを処理する前に、手順１でデータを取得します。
+Entered ID not found.,入力したIDが見つかりません。
+Options Available:,利用可能なオプション:
+Aggregation Factor,集計係数
+"Before partitioning occurrences, mask your environmental variables by your background extent.",在データを分割する前に背景範囲で環境変数をマスクしてください。
+Please select a partitioning option.,分割オプションを選択してください。
+Please specify a positive aggregation factor greater than 1.,1より大きい正の集計係数を指定してください。
+Occurrences partitioned by block method.,ブロック方式で分割された在データ。
+Aggregating rasters...,ラスターの集約…
+"Approximate lengths at equator: 10 arcmin = ~20 km, 5 arcmin = ~10 km, 2.5 arcmin = ~5 km, 30 arcsec = ~1 km. Exact length varies based on latitudinal position.",赤道での長さの目安。10 arcmin = ~20 km、5 arcmin = ~10 km、 2.5 arcmin = ~5 km、30 arcsec = ~1 km。正確な長さは緯度によって異なります。
+Select WorldClim bioclimatic variable resolution,WorldClimの生物気候変数の解像度を選択します。
+Specify variables to use in analysis?,分析に使用する変数を指定しますか？
+"Before obtaining environmental variables, obtain occurrence data in component 1.",環境変数を取得する前に手順1で在データを取得します。
+Select a raster resolution.,ラスター解像度を選択します。
+Retrieving WorldClim data...,WorldClimデータを取得しています…
+Background Extents:,背景の範囲:
+Bounding box,バウンディングボックス
+Minimum convex polygon,最小凸多角形
+Point buffers,ポイントバッファ
+Buffer area in degrees (1 degree = ~111 km). Exact length varies based on latitudinal position.,バッファは度単位（１度=～111km）です。正確な長さは緯度によって異なります。
+Study region buffer distance (degree),分析範囲のバッファ距離（度)
+"Before defining the background extent, obtain environmental data in component 3.",背景の範囲を定義する前に、手順3で環境データを取得します。
+Too few localities (<2) to create a background polygon.,背景ポリゴンを作成するには、地点が少なすぎます（<2）。
+Study extent: bounding box.,分析範囲：バウンディングボックス。
+Study extent: minimum convex polygon.,分析範囲：最小凸多角形。
+Change buffer distance to positive or negative value.,バッファ距離を正または負の値に変更します。
+Study extent: buffered points.,分析範囲：バッファリングされたポイント。
+No. of background points,背景地点数
+"Before sampling background points, define the background extent.",背景地点をサンプリングする前に、背景範囲を定義します。
+Enter a non-zero number of background points.,背景地点の数は 0より大きい値を入力してください。
+Processing environmental data...,環境データの処理…
+Environmental data masked.,マスクされた環境データ。
+Generating background points...,背景地点の生成…
+Pick a bioclimatic variable number for each axis,各軸に割り当てる生物気候変値の番号を選ぶ
+Download envelope plot (.png),エンベローププロットをダウンロード
+"Upload polygon with field order: longitude, latitude (.csv)",フィールドの順序（longitude、latitude）でポリゴンをアップロードします (.csv)
+Environmental variables missing. Obtain them in component 3.,環境変数がありません。手順3で取得します。
+Background extent files not uploaded.,背景範囲ファイルがアップロードされていません。
+"If entering a shapefile, please select all the following files: .shp, .shx, .dbf.","シェープファイルを入力する場合は、次のすべてのファイルを選択してください: .shp, .shx, .dbf."
+"Please enter either a CSV file of vertex coordinates or shapefile (.shp, .shx, .dbf).","頂点座標のCSVファイルまたはシェープファイルのいずれかを入力してください (.shp, .shx, .dbf)."
+Study extent: user-defined polygon.,分析範囲：ユーザー定義のポリゴン。
+The polygon has not been finished. Please press 'Finish' on the map toolbar. then the 'Select Occurrences' button.,ポリゴンが描画されていないので、完成していません。マップツールバーの[完了]を押してから、[在地点の選択]ボタンを押してください。
+Please select a subset of points to retain in the analysis.,分析で保持するポイントのサブセットを選択してください。
+Number of Folds,分割数
+Occurrences partitioned by jackknife method.,ジャックナイフ法によって分割された在データ。
+Select evaluation statistic,評価統計量の選択
+Download Maxent evaluation plot (.png),Maxent評価プロット（.png）をダウンロード
+No statistic selected for plotting.,プロット用に統計量が選択されていません。
+BIOCLIM ran successfully and output evaluation results.,BIOCLIMは正常に実行され、評価結果が出力されました。
+Upload Occurrence CSV,在地点のCSVファイルをアップロード
+"Please input CSV file with columns ""name"", ""longitude"", ""longitude"".",「name」、「longitude」、「longitude」の列を含むCSVファイルを入力してください。
+Project to new area or time first.,新しい時空間範囲への投影をまず行います。
+Generating MESS map...,MESSマップの生成…
+Generated MESS map for present.,在のMESSマップを生成しました。
+Choose Database,データベースを選択
+"Examples: Felis catus, Canis lupus, Nyctereutes procyonoides","例: Felis catus, Canis lupus, Nyctereutes procyonoides"
+Enter species scientific name,種の学名を入力してください
+Maximum number of occurrences recovered from databases. Downloaded records are not sorted randomly: rows are always consistent between downloads.,データベースから取得する在地点数の最大値。ダウンロードしたレコードはランダムな順ではなく、ダウンロード間で順番は一貫。
+Set maximum number of occurrences,最大の在地点数の設定
+Please input both genus and species names.,属名と種名の両方を入力してください。
+Download response plot (.png),応答プロット(.png)のダウンロード
+All response plots?,すべての応答プロット？
+Please see guidance for an explanation of different Maxent output types.,Maxentの出力のタイプについてはガイダンスの説明を参照ください。
+Prediction output,予測出力
+Generating logistic predictions...,ロジスティック予測の生成…
+Generating cloglog predictions...,cloglog予測の生成…
+clamped model prediction plotted.,クランプされたモデルの予測がプロットされました。
+unclamped model prediction plotted.,クランプされていないモデルの予測がプロットされました。
+Masking environmental grids to projection extent...,環境グリッドを投影範囲までマスキング…
+Projecting model to new area...,モデルを新しい領域に投影しています…
+Input rasters,入力ラスタ
+Raster files not uploaded.,ラスターファイルがアップロードされていません。
+Reading in rasters...,ラスターで読み込んでいます…
+Environmental predictors: User input.,環境予測変数: ユーザー入力。
+"Input rasters have undefined coordinate reference system (CRS). Mapping functionality in components Visualize Model Results and Project Model will not work. If you wish to map rasters in these components, please define their projections and upload again. See guidance text in this module for more details.",モデル予測ラスターには未定義の座標参照系（CRS）があるため、マッピングできません。これは、入力ラスターのCRSが未定義であることが原因である可能性があります。詳細については、手順「環境データの取得」のモジュール「ユーザー指定の環境データ」のガイダンステキストを参照してください。
+"The minimum distance between occurrence locations (nearest neighbor distance) in km for resulting thinned dataset. Ideally based on species biology (e.g., home-range size).",間引き後のデータセットでの、在地点間の最小距離(最近傍距離) (キロメートル)。理想的には種の生物学的特性に基づいて決めるのがよい（例：ホームレンジのサイズなど）。
+Thinning distance (km),間引き距離(km)
+Assign positive distance to thinning parameter.,間引きパラメータに正の距離を割り当てます。
+Spatially Thinning Localities...,空間間引き地点…
+Intro,イントロ
+Env Data,環境データ
+Process Occs,在データの処理
+Process Envs,環境データの処理
+Sampling,サンプリングバイアス
+Env Space,環境空間
+Visualize,可視化
+Reproduce,再現
+Support,サポート
+Component Guidance,コンポーネントガイダンス
+Module Guidance,モジュールガイダンス
+Model,モデル
+Partition Occs,在データ分割
+Map,地図
+Occs Tbl,表
+Results,結果
+About,紹介
+Load session,セッションの読み込み
+Component: Obtain Occurrence Data,コンポーネント: 在データの取得
+Component: Obtain Environmental Data,コンポーネント: 環境データの取得
+Component: Process Occurrence Data,コンポーネント: 在データの処理
+Component: Process Environmental Data,コンポーネント: 環境データの処理
+Component: Environmental Space,コンポーネント: 環境空間
+Component: Partition Occurrence Data,コンポーネント: 在データの分割
+Component: Build and Evaluate Niche Model,コンポーネント: ニッチモデル作成と評価
+Component: Visualize Model Results,コンポーネント: モデル結果の視覚化
+Component: Project Model,コンポーネント: モデル投影
+Component: Reproduce Session,コンポーネント: セッションの再現
+1 Occ Data,1 在データ
+2 Process Occs,2 在データの処理
+3 Env Data,3 環境データ
+4 Process Envs,4 環境データの処理
+5 Partition Occs,5 在データ分割
+6 Model,6 モデル
+7 Visualize,7 可視化
+8 Project,8 投影
+Session Code,セッションコード
+Change Base Map,背景地図の切り替え
+Change language,言語の切り替え
+WorldClim Bioclims,WorldClim Bioclims
+Reset occurrences.,在データをリセットします。
+Total,合計
+records for,のレコード
+returned [,が返された[
+] out of [,] から [
+] total (limit ,] 合計（制限
+). Records without coordinates removed [,).座標のないレコードが削除されました [
+]. Duplicated records removed [,]. 重複したレコードを削除した [
+]. Remaining records [,]. 残りのレコード [
+]., ].
+No records found for ,レコードが見つかりません:
+. Please check the spelling.,.スペルを確認してください。
+No records with coordinates found in,に座標を持つレコードが見つかりません
+for,対して
+.,。
+Querying,クエリ
+"Please input CSV file with columns 'name', 'longitude', 'latitude'.",「name」、「longitude」、「longitude」の列を含むCSVファイルを入力してください。
+User-specified CSV file,ユーザー指定のCSVファイル
+with total of,合計で
+records with coordinates was uploaded.,座標付きのレコードがアップロードされました。
+Removed occurrence with ID = ,削除された在データID = 
+. Updated data has n = ,. 更新されたデータ n = 
+ records., レコード.
+Total records thinned to [,合計間引かれましたレコード数が [
+] localities.,] 地域。
+Environmental predictors: WorldClim bioclimatic variables,環境予測変数: WorldClim 生物気候変数
+at,で
+ arcmin resolution., 分の解像度。
+Study extent buffered by,でバッファリングされた学習範囲
+degrees.,度です。
+Random background points sampled (n =,ランダムにサンプリングされた背景点（n =
+).,).
+"), but only ",）、 だけ
+% of points (n = ,% のポイント (n =
+) were able to be sampled.,)をサンプリングすることができました。
+Occurrences partitioned by random k-fold (k = ,ランダムなkフォールドで分割された在データ (k =
+Occurrences partitioned by checkerboard 1 method with aggregation factor ,集計係数を使用してチェッカーボード1メソッドで分割された在データ 
+Occurrences partitioned by checkerboard 2 method with aggregation factor ,集計係数を使用してチェッカーボード2メソッドで分割された在データ 
+"To use Maxent, make sure you download,",Maxentを使用するために、必ずダウンロードしてください。
+from the,から
+and place it in this directory:,を作成し、このディレクトリに配置します。
+Maxent ran successfully using,を使用して、Maxentが正常に動作しました。
+and output evaluation results for,と出力評価結果
+clamped models.,クランプされたモデル。
+unclampled models.,クランプされていないモデル。
+Generated MESS map for,生成されたMESSマップ
+for GCM,GCM用
+under RCP,RCP の下で
+New area projection for BIOCLIM model with extent coordinates:,範囲座標を持つBIOCLIMモデルの新しいエリア投影:
+New area projection for clamped model,クランプされたモデルの新しい領域投影
+with extent coordinates:,範囲座標付き:
+New area projection for unclamped,クランプされていない新しい領域投影
+Retrieving WorldClim data for,WorldClim データの取得
+New time projection for BIOCLIM model with extent coordinates:,範囲座標を持つBIOCLIMモデルの新しい時間投影法:
+New time projection for clamped model,クランプされたモデルの新しい時間投影法
+New time projection for unclamped model,クランプされていないモデルの新しい時間投影法
+Projected to,に投影
+Using map center,地図の中心座標
+Removing occurrences with occID = ,削除された在データ occID = 

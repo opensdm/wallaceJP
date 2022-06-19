@@ -1,0 +1,40 @@
+---
+title: "tab4_background"
+output: html_document
+---
+
+### **モジュール:** ***分析範囲の選択***
+
+**背景**
+
+生物種の存在データに関連する環境を何らかの比較用データセット(Maxentを含む。手順6: **モデル**を参照)と比較するニッチ／分布モデリングの手法では、分析範囲の選択が最も重要です。決定如何で比較するデータセットのグリッドセルの範囲が定義されます(ユーザーが提供する不在情報、またはアルゴリズムによってサンプルした偽不在あるいは背景地点。Anderson 2013)。分析範囲の選択における、ときには相反する各種の原則は文献にて説明されています(Peterson et al. 2011 chap. 7)。多くの研究者がモデルを構築する対象となる地理的または環境的範囲の重要性を強調する一方で、他の研究者は研究対象種が環境的平衡点にあると思われる地域の説明変数による識別を提案しています(Vanderwal et al. 2009、Anderson and Raza 2010、Barve et al. 2011、Saupe et al. 2012、Franklin 2010 chap. 4、Anderson 2013、Merow et al. 2013)。例えば、(特に他の場所や時点について好適度を推定する場合)分散制限によって、対象種が生息していない地理的区域を分析範囲に含めるべきではないというのが最重要な基本原則のひとつです。こうした区域を含めることは偽否定のシグナルを送り、モデルの環境に対する推定応答にバイアスをかけることになります(Anderson 2015)。しかし、こうした理論的提案にかかわらず、分析範囲の操作上の選択は専門家の意見と存在する自然史情報に依拠するのが普通です(Acevedo et al. 2012、Gerstner et al. 2018)。
+
+**実装** 
+
+このモジュールでは、Rパッケージの(空間オブジェクトを定義する)`sp` および(空間オブジェクトをバッファする)`rgeos`の重要な機能を使用します。
+
+このモジュールでは、*Wallace* は分析範囲を決定するのに、1)境界ボックスによる(4方位における最極端の座標を頂点とする長方形)、2)最小凸多角形による(区域を最小化した位置の周囲に描いた凸形)、または3)在データ地点周囲のバッファによる、の3つの簡単な方法を用意しています。これらオプションのそれぞれについて、ユーザーはバッファ距離を(メートルではなく緯度経度で)指定することができ、*Wallace* は形成された多角形によって環境グリッドをマスキングします。マスキングしたグリッドは3つのラスタグリッド形式(.asc、.grd、および .tif)のいずれかでダウンロードできます。
+
+**引用文献**
+
+Acevedo, P., Jiménez‐Valverde, A., Lobo, J. M Real, R. (2012). Delimiting the geographical background in species distribution modelling. *Journal of Biogeography*. 39: 1383-1390.
+
+Anderson R.P., Raza A. (2010). The effect of the extent of the study region on GIS models of species geographic distributions and estimates of niche evolution: preliminary tests with montane rodents (genus *Nephelomys*) in Venezuela. *Journal of Biogeography*. 37: 1378-1393.
+
+Anderson R.P. (2013). A framework for using niche models to estimate impacts of climate change on species distributions. *Annals of the New York Academy of Sciences*. 1297: 8-28.
+
+Anderson, R. P. (2015). El modelado de nichos y distribuciones: no es simplemente "clic, clic, clic." [With English and French translations: Modeling niches and distributions: it's not just "click, click, click" and La modélisation de niche et de distributions: ce n'est pas juste "clic, clic, clic"]. *Biogeografía*. 8: 4-27.
+
+Barve N., Barve V., Jiménez-Valverde A., Lira-Noriega A., Maher S.P., Peterson A.T., Soberón J., Villalobos F. (2011). The crucial role of the accessible area in ecological niche modeling and species distribution modeling. *Ecological Modelling*. 222: 1810-1819.
+
+Franklin J. (2010). Mapping Species Distributions: Spatial Inference and Prediction. Data for species distribution models: the biological data. In: Mapping species distributions: spatial inference and prediction. Cambridge: Cambridge University Press.
+
+Gerstner, B. E., Kass, J. M., Kays, R., Helgen, K. M., Anderson, R. P. (2018). Revised distributional estimates for the recently discovered olinguito (Bassaricyon neblina), with comments on natural and taxonomic history. *Journal of Mammalogy*. 99: 321-332.
+
+Merow, C., Smith, M. J., & Silander, J. A. (2013). A practical guide to MaxEnt for modeling species' distributions: what it does, and why inputs and settings matter. *Ecography*. 36: 1058-1069.
+
+Peterson A. T., Soberón J., Pearson R. G., Anderson R. P., Martinez-Meyer E., Nakamura M., Araújo M. B. (2011). Modeling Ecological Niches. In: *Ecological Niches and Geographic Distributions*. Princeton, New Jersey: Monographs in Population Biology, 49. Princeton University Press.
+
+Saupe, E. E., Barve, V., Myers, C. E., Soberón, J., Barve, N., Hensz, C. M., ... & Lira-Noriega, A. (2012). Variation in niche and distribution model performance: the need for a priori assessment of key causal factors. *Ecological Modelling*. 237: 11-22.
+
+VanDerWal, J., Shoo, L. P., Graham, C., & Williams, S. E. (2009). Selecting pseudo-absence data for presence-only distribution modeling: How far should you stray from what you know?. *Ecological Modelling*. 220: 589-594.

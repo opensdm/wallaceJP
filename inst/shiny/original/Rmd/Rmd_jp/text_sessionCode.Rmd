@@ -1,0 +1,17 @@
+---
+title: "sessionCode"
+output: html_document
+---
+
+R パッケージ `rmarkdown` を使用すると、*Wallace* ユーザーは 現在のセッションで実行されるアクション (および基になるコード) の履歴をダウンロードできます。これには、複数のフォーマット (.Rmd (R Markdown)、.pdf、.html、または.doc) が含まれます。.Rmd 形式は、R セッションで実行した場合に分析を再現する実行可能な R スクリプト ファイルです。このファイルは、プレーンテキストとRコード「チャンク」で構成されています。
+
+RStudio には R Markdown ファイルのための拡張機能があります。RStudio で .Rmd を開き、右上の「実行」をクリックするだけで、チャンクごと、または一度にすべてのチャンクを実行することができます。詳細については、RStudio [チュートリアル](http://rmarkdown.rstudio.com/lesson-1.html)をご覧ください。
+
+#### 注意事項
+セッションコードのPDFを作成するには、動作するバージョンのTeXがインストールされている必要があります。Mac OSの場合、 MacTeX [here](http://www.tug.org/mactex/)をダウンロードしてください。Windowsの場合は、以下の手順を実行してください。
+  
+1. MiKTeX [here](http://miktex.org/2.9/setup/)をダウンロードしてインストール.
+2. Rstudioで `Sys.getenv("PATH")` を実行. このコマンドは、pdflatex.exeへのパスを返します。 Windows (64-bit) では、 `C:\Program Files\MiKTeX 2.9\miktex\bin\x64\pdflatex.exe` となります。もし、pdflatex.exeがこの場所にない場合、Rstudioはエラーコード41を返します。
+3. パス変数を設定するには、以下をRstudioで実行してください:  
+`d <- "C:/Program Files/MiKTeX 2.9/miktex/bin/x64/"`  
+`Sys.setenv(PATH=paste(Sys.getenv("PATH"), d, sep=";"))`

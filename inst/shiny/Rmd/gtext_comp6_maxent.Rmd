@@ -1,0 +1,54 @@
+---
+title: "comp6_maxent"
+output: html_document
+---
+
+### **モジュール:** ***Maxent***
+
+**背景**
+
+Maxentは、生物種の環境への応答を、手元の入力データを基に分析範囲全体で可能な限り均一になるように制約した上で推定する機械学習アルゴリズムです(Phillips et al. 2006、Elith et al. 2011)。Maxentは分析範囲にある背景環境をそこから得た不作為のサンプルを基に特徴付けるため、存在－背景ENM手法と呼ばれ、サンプルサイズの小ささも含めて(Hernandez et al. 2006)、幅広い環境と生物種について最もパフォーマンスの高いニッチ／分布モデリング手法の1つとして知られています(Elith et al. 2006)。
+
+機械学習の手法として、Maxentは変数の選択とモデルのフィットについて内部的に決定する能力があります(James et al. 2013)。それにもかかわらず、各種の外部決定がモデルの複雑さと地理的予測に大きな影響を与えることがあります。重要なのは、ここで梃入れしたMaxentソフトウェアはユーザーにモデルの複雑性をフィーチャクラスと正則化乗数の2つの基本因子を通じて拡大または縮小する能力を与えるということです。まず、各種の「*フィーチャクラス* 」は環境空間における利用可能なモデル関係の形状を判断します。フィーチャクラスが多い(またより複雑な)ほどモデルの複雑性が増す可能性が高まります。*Wallace* のフィーチャには線状(L)、二次項(Q)、ヒンジ(H)および成果(P)があります。次に、「*正則化乗数* 」の値が高いほど複雑性を犠牲にする程度が高まるため、変数の数を減らしたより簡単なモデルになる傾向があります。こうした設定はMaxenでは特にモデル出力に大きく影響することがあります(Warren and Seifert 2011、Radosavljevic & Anderson 2014)。こうした理由から、モデルのパフォーマンスの評価と最適なモデルの複雑性の推定がMaxentによるニッチ／分布モデル研究での重要な要素となるのです(例えば、使用できるフィーチャクラスとそれぞれに適用される正則化乗数を同時に変える、正則化乗数の正則化ステップ値を細かくすると最適な正則化設定の推定精度が高まるなど)。技術的な情報はPhillips and Dudík (2008)を、他の説明はElith et al. (2011) および Merow et al. (2013)をそれぞれ参照してください。
+
+**実装** 
+
+このモジュールではRパッケージの`ENMeval`と`dismo`を使用し、フィーチャクラスおよび正則化乗数に広範囲なモデル設定を適用してMaxentニッチ／分布モデルを構築、評価します(Muscarella et al. 2014)。
+
+ここでは2つのワークフローが自動化されます。すなわち、1)複雑性に異なる制約を加えた一組の候補モデルを構築し、2)そのパフォーマンスを定量化します。最初のワークフローについては、フィーチャクラスと正則化乗数の様々な組合せを用いてモデルを作成します。フィールドはモデル評価と最適なモデルの複雑性の推定に関するどのコンセンサスからも離れています(特にMaxentで使われるような存在-背景データセット)。しかし、ここでの特定の評価基準(手順6: **モデル構築**の手引きを参照)は、ユーザーが最適な設定を選択する上で役に立ちます(Radosavljevic & Anderson 2014)。評価統計の表は.csvファイルとしてダウンロードすることができ、また(ドロップダウンメニューからモデルを選択して)各MaxentモデルのLambdaファイル情報を閲覧することもできます。このファイルでは、最初の列にパラメータ名を示し、2列目にモデル係数(lambda値)、そしてそのパラメータの最小値および最大値をそれぞれ3列目と4列目に表示します。各パラメータは元の変数のひとつ(または成果フィーチャの場合は２つ)のフィーチャであり、したがって複数の行が同じ変数の異なるフィーチャに対応することがあります。なお、lambda値が０のパラメータはモデルには含められないので注意が必要です。詳細は<a href="https://github.com/mrmaxent/Maxent/blob/d3bd281f7b1ffb13b8a37439d9843caaa14e7888/density/help.html.pre" target="_blank">Maxentのヘルプ文書</a>を参照してください。さらに、手順7: **モデルの結果の可視化**のモジュール **Maxent評価プロット**で評価の結果を、モジュール **応答曲線のプロット**で各変数の応答曲線を、それぞれ閲覧することができます。
+
+研究範囲全般にわたって予測する際、トレーニングデータセットにはない環境条件に外挿することによって推定する必要性があり、作業が複雑になることがあります。Maxentでは、モデルが生成したラスタ予測については、トレーニングの値より著しく極端な環境条件(すなわち非類似条件)に対して予測された好適度の値を、トレーニングデータセットの変数の最小(最低)値または最大(最高)値に関連する好適度の値に設定(すなわち「クランプ」)することができます。これは、トレーニング範囲とは異なる地域か時間またはその両方について行うどのような予測についてもよくあることで(手順8: **モデルの投影**参照)、トレーニング範囲内での予測においても、背景サンプルに研究範囲全体のピクセルを含まない場合に起こる可能性があります。「クランプ」を行わない場合、モデルの応答は環境的外挿を必要とするピクセルに(制約なしで)適用されます。
+
+*注意* ：しかしながら、maxent.jarオプションでは、モデル予測は現在、トレーニングデータセットより極端な環境値のあるグリッドセル(背景サンプル＋在データレコード)について常に「クランプ」されるようになっています。これは、`dismo`における`predict()`関数のバグによるもので、モデル予測では「クランプする」オプションが常にオンになっています(すなわち、dismoを使ってクランプをオフにしてトレーニングデータセットの環境条件を超える無制約の外挿をすることはできません)。
+
+**トラブルシューティング**
+
+Rコンソールで以下のエラーが発生メッセージが表示された場合： 
+
+<font color='red'>Warning: Error in rJava::.jarray: java.lang.OutOfMemoryError: Java heap space</font>
+
+新たにRセッションを開始して、`rJava`の読み込みを阻止し、Rコンソールで下記を実行して、「8000」の数値がまだエラーを発生させる場合はこの「8000」を適当なより大きい数値に変えます。これによってJavaに割り当てられるメモリを増やして作業を続行することができます。
+
+`options(java.parameters = "-Xmx8000m")`
+
+**引用文献**
+
+Elith J., Graham C.H., Anderson R.P., Dudík M., Ferrier S., Guisan A., Hijmans R.J., Huettmann F., Leathwick J.R., Leahmann A., Li J., Lohmann L.G., Loiselle B.A., Manion G., Moritz C., Nakamura M., Nakazawa Y., Overton J.M., Peterson A.T., Phillips S.J., Richardson K.S., Scachetti-Pereira R., Schapire R.E., Soberón J., Williams S., Wisz M.S., Zimmermann N.E. 2006. Novel methods improve prediction of species' distributions from occurrence data. *Ecography*. 29: 129-151.
+
+Elith, J., Phillips, S.J., Hastie, T., Dudík, M., Chee, Y.E., & Yates, C.J. (2011). A statistical explanation of MaxEnt for ecologists. *Diversity and Distributions*. 17: 43-57.
+
+Hernandez, P.A., Graham, C. H., Master, L.L., & Albert, D.L. (2006). The effect of sample size and species characteristics on performance of different species distribution modeling methods. *Ecography*. 29: 773-785.
+
+James, G., Witten, D., Hastie, T., & Tibshirani, R. (2013). *An Introduction to Statistical Learning* (Vol. 6). New York: Springer.
+
+Merow C., Smith M.J., Silander J.A. (2013). A practical guide to MaxEnt for modeling species' distributions: What it does, and why inputs and settings matter. *Ecography*. 36: 1058-1069.
+
+Muscarella, R., Galante, P. J., Soley-Guardia, M., Boria, R. A., Kass, J. M., Uriarte, M., & Anderson, R. P. (2014). ENMeval: An R package for conducting spatially independent evaluations and estimating optimal model complexity for Maxent ecological niche models. *Methods in Ecology and Evolution*. 5: 1198-1205.
+
+Phillips, S.J., Anderson, R.P. & Schapire, R.E. (2006) Maximum entropy modeling of species geographic distributions. *Ecological Modelling*. 190: 231-259.
+
+Phillips, S.J., & Dudík, M. (2008). Modeling of species distributions with Maxent: new extensions and a comprehensive evaluation. *Ecography*. 31: 161-175.
+
+Radosavljevic A., Anderson R.P. (2014). Making better Maxent models of species distributions: complexity, overfitting and evaluation. *Journal of Biogeography*. 41: 629-643.
+
+Warren, D. L., & Seifert, S. N. (2011). Ecological niche modeling in Maxent : the importance of model complexity and the performance of model selection criteria. *Ecological Applications*. 21: 335-342.

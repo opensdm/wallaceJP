@@ -1,0 +1,40 @@
+---
+title: "comp3_worldclim"
+output: html_document
+---
+
+### **モジュール:** ***WorldClim***
+
+**背景**
+
+WorldClimプロジェクトは、南極を除くすべての大陸について、地球の地表面の生物気候変数を提供しています。気象観測所からの月例データを標高を共変量として空間的に外挿し、気温と降水量の様々な様相を反映する19の生物気候変数を導出しています (Hijmans et al. 2005)。WorldClim<a href="http://www.worldclim.org" target="_blank">ウェブサイト</a>から得た各変数の詳細説明は以下のとおりです。さらに詳しくはウェブサイトに掲載されています。
+
+BIO1 = 年間平均気温 
+BIO2 = 平均日較差(月ごとの記録(最高気温－最低気温)の中央値) 
+BIO3 = 等温性(BIO2÷BIO7)(×100)  
+BIO4 = 気温の季節変化(標準偏差 × 100)  
+BIO5 = 最暖月の最高気温  
+BIO6 = 最寒月の最低気温  
+BIO7 = 気温の年較差(BIO5－BIO6) 
+BIO8 = 最多湿四半期の平均気温  
+BIO9 = 最乾燥四半期の平均気温  
+BIO10 = 最暖月の平均気温 
+BIO11 = 最寒月の平均気温 
+BIO12 = 年間降水量  
+BIO13 = 最多湿月の降水量  
+BIO14 = 最乾燥月の降水量  
+BIO15 = 降水量の季節変化(変動係数) 
+BIO16 = 最多湿四半期の降水量  
+BIO17 = 最乾燥四半期の降水量  
+BIO18 = 最暖四半期の降水量  
+BIO19 = 最寒四半期の降水量  
+
+**実装**
+
+このモジュールでは、WorldClimサーバーから生物気候変数をダウンロードするために、Rパッケージの `raster`が不可欠です。
+
+*Wallace* ではデータの解像度4種類すべて(10arcmin≈20km、5arcmin≈10 km、 2.5arcmin≈5km、30arcsec≈1km)を使用することができます。`dismo`の現行バージョン(1.1-1)では、細粒度の最も高いWorldClimデータセット(30arcsec)は30度×30度（大雑把に3300×3300km）のタイルによってしかダウンロードできず、また*Wallace* は表示地図の現在の中心をタイルの基準として使用しています。つまり、*Wallace* の現行バージョンでの30arcsecの気候データによる分析はタイル１枚の範囲に制限されることを意味します。ローカルで実行しているときは、データセットが*Wallace* フォルダにダウンロードされます(相当の時間を要します)が、その後に実行する際に同じ解像度を選択すると、*Wallace* はダウンロードしたデータを使用します。
+
+**引用文献**
+
+Hijmans, R. J., Cameron, S. E., Parra, J. L., Jones, P. G., Jarvis, A. 2005. Very high resolution interpolated climate surfaces for global land areas. *International Journal of Climatology*. 25: 1965-1978.

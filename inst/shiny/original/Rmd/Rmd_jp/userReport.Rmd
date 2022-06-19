@@ -1,0 +1,629 @@
+---
+title: Wallace Session `r Sys.Date()`
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+knit_engines$set(asis = function(options) {
+  if (options$echo && options$eval) knit_child(text = options$code)
+})
+knitr::opts_chunk$set(message = FALSE, warning = FALSE, eval = FALSE)
+```
+
+```{r vars, echo = FALSE, include = FALSE, eval = TRUE}
+# comp1
+occs.db <- rvs$comp1 == 'db'
+occs.csv <- rvs$comp1 == 'csv'
+occs.any <- occs.db | occs.db
+# comp2
+poccs.rem <- 'rem' %in% rvs$comp2
+poccs.sel <- 'sel' %in% rvs$comp2
+poccs.thin <- 'thin' %in% rvs$comp2
+poccs.any <- poccs.rem | poccs.sel | poccs.thin
+# comp3
+env.bc <- rvs$comp3 == 'bc'
+env.user <- rvs$comp3 == 'user'
+env.any <- env.bc | env.user
+# comp4
+bg.bb <- rvs$comp4.shp == 'bb'
+bg.mcp <- rvs$comp4.shp == 'mcp'
+bg.ptbuf <- rvs$comp4.shp == 'ptbuf'
+bg.userCSV <- rvs$comp4.shp == 'csv'
+bg.userShp <- rvs$comp4.shp == 'shp'
+bg.user <- bg.userShp | bg.userCSV
+bg.any <- rvs$comp4.shp != ''
+bg.bufWid <- rvs$comp4.buf > 0
+# comp5
+part.block <- rvs$comp5 == 'block'
+part.cb1 <- rvs$comp5 == 'cb1'
+part.cb2 <- rvs$comp5 == 'cb2'
+part.jack <- rvs$comp5 == 'jack'
+part.rand <- rvs$comp5 == 'rand'
+part.any <- rvs$comp5 != ''
+# comp6
+mod.bioclim <- rvs$comp6 == 'bioclim'
+mod.maxent <- rvs$comp6 == 'maxent'
+mod.any <- mod.bioclim | mod.maxent
+alg.maxent <- if (mod.maxent) {rvs$algMaxent == 'maxent.jar'} else {FALSE}
+alg.maxnet <- if (mod.maxent) {rvs$algMaxent == 'maxnet'} else {FALSE}
+# comp7
+viz.pred.thr <- if (!(is.null(rvs$comp7.thr))) {!(rvs$comp7.thr == 'noThresh')} else {FALSE}
+viz.pred.p10 <- rvs$comp7.thr == 'p10'
+viz.pred.raw <- rvs$comp7.type == 'raw'
+viz.pred.log <- rvs$comp7.type == 'logistic'
+viz.pred.cll <- rvs$comp7.type == 'cloglog'
+viz.pred <- 'map' %in% rvs$comp7
+viz.mxEval <- 'mxEval' %in% rvs$comp7
+viz.bcPlot <- 'bcPlot' %in% rvs$comp7
+viz.resp <- 'resp' %in% rvs$comp7
+viz.any <- rvs$comp7 != ''
+# comp8
+pj.area <- rvs$comp8.pj == 'area'
+pj.time <- rvs$comp8.pj == 'time'
+pj.mess <- rvs$comp8.esim == 'mess'
+pj.thr <- if (!(is.null(rvs$comp8.thr))) {!(rvs$comp8.thr == 'noThresh')} else {FALSE}
+pj.any <- pj.area | pj.time | pj.mess
+```
+
+*Wallace* v1.1.3 セッションのRコード履歴は以下の通りです。
+
+この R Markdown ファイルを RStudio で実行することで、セッションの結果を再現することができます。
+
+Each code block is called a "chunk", and you can run them either one-by-one or all at once by choosing an option in the "Run" menu at the top-right corner of the "Source" pane in RStudio. 
+
+詳細は<http://rmarkdown.rstudio.com>を参照してください
+
+### パッケージのインストール
+
+Wallace は以下の R パッケージを使用しています。
+```{r loadPkgs}
+library(spocc)
+library(spThin)
+library(dismo)
+library(rgeos)
+library(ENMeval)
+library(dplyr)
+```
+
+Wallace には、異なるパッケージといくつかの追加機能を統合するために開発されたいくつかの関数も含まれています。このため、ファイル'関数をロードする必要があります。R', 関数 `system.file()` がこのスクリプトを見つけ、`source()`がそれをロードします。
+
+```{r loadFunctions}
+source(system.file('shiny/funcs', 'functions.R', package = 'wallace'))
+```
+
+## *`r "{{spName}}"`*の解析結果.
+
+```{asis, echo = occs.any, eval = occs.any, include = occs.any}
+### 在データを取得する
+```
+
+```{asis, echo = occs.db, eval = occs.db, include = occs.db}
+The search for occurrences was limited to `r {{occNum}}` records. Obtain occurrence records of the selected species from the `r "{{dbName}}"` database.
+```
+
+```{r occSearch, echo = occs.db, include = occs.db}
+# 選択したデータベースにオカレンスレコードを検索します
+results <- spocc::occ(query = "{{spName}}", from = "{{dbName}}", limit = {{occNum}}, has_coords = TRUE)
+# spoccオブジェクトからデータテーブルを取得します。
+results.data <- results[["{{dbName}}"]]$data[[formatSpName("{{spName}}")]]
+# 座標が重複する行を削除します。
+occs.dups <- duplicated(results.data[c('longitude', 'latitude')])
+occs <- results.data[!occs.dups,]
+# 緯度と経度が数値であることを確認します (文字の場合もあります)。
+occs$latitude <- as.numeric(occs$latitude)
+occs$longitude <- as.numeric(occs$longitude)
+# すべてのレコードに一意の ID を与える。
+occs$occID <- row.names(occs)
+```
+
+```{asis, echo = occs.csv, eval = occs.csv, include = occs.csv}
+User CSV path with occurrence data. If the CSV file is not in the current workspace, change to the correct file path (e.g. "/Users/darwin/Documents/occs.csv").
+```
+
+```{r occInput, echo = occs.csv}
+# 注意：CSVファイルを含むフォルダーへのパスを指定してください。
+d.occs <- ''
+# ユーザー在データcsvファイルへのパスを作成します。
+userOccs.path <- file.path(d.occs, "{{occsCSV}}")
+# csvで読み込む
+userOccs.csv <- read.csv(userOccs.path, header = TRUE)
+# 座標が重複する行を削除します。
+occs.dups <- duplicated(userOccs.csv[c('longitude', 'latitude')])
+occs <- userOccs.csv[!occs.dups,]
+# Nasを削除します
+occs <- occs[complete.cases(occs$longitude, occs$latitude), ]
+# すべてのレコードに一意の ID を与える。
+occs$occID <- row.names(occs)
+```
+
+
+
+
+```{asis, echo = poccs.any, eval = poccs.any, include = poccs.any}
+### 在データの処理
+```
+
+```{asis, echo = poccs.rem, eval = poccs.rem, include = poccs.rem}
+Remove the occurrence localities with the following IDs: `r {{occsRemoved}}`.
+```
+
+```{r poccs.rem, echo = poccs.rem, include = poccs.rem}
+# 選択された occID に一致する行を削除します
+occs <- occs %>% filter(!(occID %in% {{occsRemoved}}))
+```
+
+```{asis, echo = poccs.sel, eval = poccs.sel, include = poccs.sel}
+The following code recreates the polygon used to select occurrences to keep in the analysis.
+```
+
+```{r occsSelect, echo = poccs.sel, include = poccs.sel}
+selCoords <- data.frame(x = {{occsSelX}}, y = {{occsSelY}})
+selPoly <- sp::SpatialPolygons(list(sp::Polygons(list(sp::Polygon(selCoords)), ID=1)))
+occs.xy <- occs[c('longitude', 'latitude')]
+sp::coordinates(occs.xy) <- ~ longitude + latitude
+intersect <- sp::over(occs.xy, selPoly)
+intersect.rowNums <- as.numeric(which(!(is.na(intersect))))
+occs <- occs[intersect.rowNums, ]
+```
+
+```{asis, echo = poccs.thin, eval = poccs.thin, include = poccs.thin}
+Spatial thinning selected. Thin distance selected is `r {{thinDist}}` km.
+```
+
+```{r doThin, echo = poccs.thin, include = poccs.thin}
+output <- spThin::thin(occs, 'latitude', 'longitude', 'name', thin.par = {{thinDist}}, reps = 100, locs.thinned.list.return = TRUE, write.files = FALSE, verbose = FALSE)
+```
+
+```{asis, echo = poccs.thin, eval = poccs.thin, include = poccs.thin}
+Since spThin did 100 iterations, there are 100 different variations of how it thinned your occurrence localities. As there is a stochastic element in the algorithm, some iterations may include more localities than the others, and we need to make sure we maximize the number of localities we proceed with.
+```
+
+```{r doThin2, echo = poccs.thin, include = poccs.thin}
+# 最大出現回数を返す反復を見つける
+maxThin <- which(sapply(output, nrow) == max(sapply(output, nrow)))
+# 最大値が複数ある場合は、最初のものを選択します
+maxThin <- output[[ifelse(length(maxThin) > 1, maxThin[1], maxThin)]]  
+# 間引きされたoccのみに一致するようにoccをサブセットする
+occs <- occs[as.numeric(rownames(maxThin)),]  
+```
+
+
+
+
+```{asis, echo = env.any, eval = env.any, include = env.any}
+### 環境データ取得
+```
+
+``` {asis, echo = env.bc, eval = env.bc, include = env.bc}
+Using WorldClim (http://www.worldclim.org/) bioclimatic dataset at resolution of `r {{bcRes}}` arcmin.
+```
+
+```{r getEnvBC, echo = env.bc, include = env.bc}
+# WorldClim生物気候変数ラスターを取得する
+envs <- raster::getData(name = "worldclim", var = "bio", res = {{bcRes}}, lat = {{bcLat}}, lon = {{bcLon}})
+# 名前の変更ラスター変数
+envRes <- {{bcRes}}
+if (envRes == 0.5) {
+  i <- grep('_', names(envs))
+  editNames <- sapply(strsplit(names(envs)[i], '_'), function(x) x[1])
+  names(envs)[i] <- editNames
+}
+i <- grep('bio[0-9]$', names(envs))
+editNames <- paste('bio', sapply(strsplit(names(envs)[i], 'bio'), function(x) x[2]), sep='0')
+names(envs)[i] <- editNames
+# 選択した変数によるサブセット
+envs <- envs[[{{bcSels}}]]
+# occグリッドセルで環境値を抽出する
+locs.vals <- raster::extract(envs[[1]], occs[, c('longitude', 'latitude')])
+# 環境値のない occsを削除する
+occs <- occs[!is.na(locs.vals), ]  
+```
+
+```{r getEnvUser, echo = env.user, include = env.user}
+# 注意：CSVファイルへのフルパスを指定してください
+d.envs <- ''
+# ラスターファイルへのパスを作成する
+userRas.paths <- file.path(d.envs, {{userEnvs}})
+# ラスターファイルからラスタースタックを作成する
+envs <- raster::stack(userRas.paths)
+```
+
+
+
+
+```{r bgSwitch, include = FALSE, eval = bg.any}
+bgType <- switch("{{bgSel}}", 'bb'='Bounding Box', 'mcp'='Minimum Convex Polygon',   
+                'ptsbuf'='Buffered Points',  'user'='User-defined')
+```
+
+```{asis, echo = bg.any, eval = bg.any, include = bg.any}
+### 環境データの処理
+Background selection technique chosen as `r bgType`.
+```
+
+```{r bgBB, echo = bg.bb, include = bg.bb}
+xmin <- min(occs$longitude)
+xmax <- max(occs$longitude)
+ymin <- min(occs$latitude)
+ymax <- max(occs$latitude)
+bb <- matrix(c(xmin, xmin, xmax, xmax, xmin, ymin, ymax, ymax, ymin, ymin), ncol=2)
+bgExt <- sp::SpatialPolygons(list(sp::Polygons(list(sp::Polygon(bb)), 1)))
+```
+
+```{r bgMCP, echo = bg.mcp, include = bg.mcp}
+occs.xy <- occs[c('longitude', 'latitude')]
+sp::coordinates(occs.xy) <- ~ longitude + latitude
+bgExt <- mcp(occs.xy)
+```
+
+```{r bgPtBufs, echo = bg.ptbuf, include = bg.ptbuf}
+# バッファリング用の空間点群を作成します
+occs.xy <- occs[c('longitude', 'latitude')]
+sp::coordinates(occs.xy) <- ~ longitude + latitude
+bgExt <- occs.xy
+```
+
+```{asis, echo = bg.userCSV, eval = bg.userCSV, include = bg.userCSV}
+Read a .csv file and generate a Spatial Polygon object.
+```
+
+```{r bgUserCSV, echo = bg.userCSV, include = bg.userCSV}
+# 注意：CSVファイルへのフルパスを指定してください
+csvPath <- ''
+# ポリゴンの座標でcsvを読み取る
+shp <- read.csv(csvPath, header = TRUE)
+bgExt <- sp::SpatialPolygons(list(sp::Polygons(list(sp::Polygon(shp)), 1)))
+```
+
+```{asis, echo = bg.userShp, eval = bg.userShp, include = bg.userShp}
+User study extent name is `r "{{bgUserShpName}}"`. User study extent path is `r "{{bgUserShpPath}}"`. Read in the .shp file and generate a Spatial Polygon object.
+```
+
+```{r bg.userShp, echo = bg.userShp, include = bg.userShp}
+# 注意: シェープファイルを含むフォルダへのパスを指定します
+d.bg <- ''
+# ポリゴンの座標でcsvを読み取る
+bgExt <- rgdal::readOGR(d.bg, "{{bgUserShpName}}")
+```
+
+```{asis, echo = bg.bufWid, eval = bg.bufWid, include = bg.bufWid}
+Buffer size of the study extent polygon defined as `r {{bgBuf}}` degrees.
+```
+
+```{r bgufWid, echo = bg.bufWid, include = bg.bufWid}
+bgExt <- rgeos::gBuffer(bgExt, width = {{bgBuf}})
+```
+
+```{asis, echo = bg.any, eval = bg.any, include = bg.any}
+Mask environmental variables by `r bgType`, and take a random sample of background values from the study extent. As the sample is random, your results may be different than those in the session. If there seems to be too much variability in these background samples, try increasing the number from 10,000 to something higher (e.g. 50,000 or 100,000). The better your background sample, the less variability you'll have between runs.
+```
+
+```{r envsMask, echo = bg.any, include = bg.any}
+# 背景範囲の形状で環境ラスターをトリミングします
+envsBgCrop <- raster::crop(envs, bgExt)
+# トリミングされたラスターから背景範囲の形状をマスクします
+envsBgMsk <- raster::mask(envsBgCrop, bgExt)
+# ランダムな背景ポイントのサンプル
+bg.xy <- dismo::randomPoints(envsBgMsk, {{bgPtsNum}})
+# 行列出力をデータフレームに変換します
+bg.xy <- as.data.frame(bg.xy)  
+colnames(bg.xy) <- c("longitude", "latitude")
+```
+
+
+```{r partSwitch, include = FALSE, eval = part.any}
+partSwitch <- switch("{{partSel}}", 'block'='Block', 'cb1'='Checkerboard 1', 'cb2'='Checkerboard 2', 'jack'='Jackknife', 'random'='Random')
+```
+
+```{asis, echo = part.any, eval = part.any, include = part.any}
+### 在データの分割
+Occurrence data is now partitioned for cross-validation, a method that iteratively builds a model on all but one group and evaluates that model on the left-out group. 
+
+For example, if the data is partitioned into 3 groups A, B, and C, a model is first built with groups A and B and is evaluated on C. This is repeated by building a model with B and C and evaluating on A, and so on until all combinations are done. 
+
+Cross-validation operates under the assumption that the groups are independent of each other, which may or may not be a safe assumption for your dataset. Spatial partitioning is one way to ensure more independence between groups.
+
+You selected to partition your occurrence data by the `r partSwitch` method.
+```
+
+```{r blockGrp, echo = part.block, include = part.block}
+occs.xy <- occs[c('longitude', 'latitude')]
+group.data <- ENMeval::get.block(occ = occs.xy, bg = bg.xy)
+```
+
+```{r check1Grp, echo = part.cb1, include = part.cb1}
+occs.xy <- occs[c('longitude', 'latitude')]
+group.data <- ENMeval::get.checkerboard1(occ = occs.xy, env = envsBgMsk,
+                                         bg = bg.xy, aggregation.factor = {{aggFact}})
+```
+
+```{r check2Grp, echo = part.cb2, include = part.cb2}
+occs.xy <- occs[c('longitude', 'latitude')]
+group.data <- ENMeval::get.checkerboard2(occ = occs.xy, env = envsBgMsk,
+                                         bg = bg.xy, aggregation.factor = {{aggFact}})
+```
+
+```{r jackGrp, echo = part.jack, include = part.jack}
+occs.xy <- occs[c('longitude', 'latitude')]
+group.data <- ENMeval::get.jackknife(occ = occs.xy, bg = bg.xy)
+```
+
+```{r randGrp, echo = part.rand, include = part.rand}
+occs.xy <- occs[c('longitude', 'latitude')]
+group.data <- ENMeval::get.randomkfold(occ = occs.xy, bg = bg.xy, kfolds = {{kfolds}})
+```
+
+```{r  echo = part.any, include = part.any}
+# リストから在データと背景分割グループ番号を引き出します
+occs.grp <- group.data[[1]]
+bg.grp <- group.data[[2]]
+```
+
+
+
+
+```{asis, echo = mod.any, eval = mod.any, include = mod.any}
+### ニッチモデルの構築と評価
+You selected the `r "{{enmSel}}"` model.
+```
+
+```{r bioclim, echo = mod.bioclim, include = mod.bioclim}
+e <- ENMeval::ENMevaluate(occs = occs.xy, envs = envsBgMsk, bg = bg.xy,
+                          algorithm = "bioclim", partitions = "user",
+                          occ.grp = occs.grp, bg.grp = bg.grp)
+# 結果データフレームとモデルのリストを解凍します
+evalTbl <- e@results
+evalMods <- e@models
+names(e@predictions) <- "bioclim"
+evalPreds <- e@predictions
+```
+
+```{r maxent, echo = mod.maxent, include = mod.maxent, results = 'hide'}
+# テストする正則化乗数のベクトルを定義します
+rms <- seq({{rms1}}, {{rms2}}, {{rmsStep}})
+# 選択したすべてのパラメータ設定に対してモデル構築を反復処理する
+e <- ENMeval::ENMevaluate(occ = occs.xy, env = envsBgMsk, bg.coords = bg.xy,
+                          RMvalues = rms, fc = {{fcs}}, method = 'user', 
+                          occ.grp = occs.grp, bg.grp = bg.grp, 
+                          clamp = {{clamp}}, algorithm = "{{algMaxent}}")
+
+# 結果データフレーム、モデルのリスト、および生の予測のRasterStackを解凍します
+evalTbl <- e@results
+evalMods <- e@models
+names(evalMods) <- e@tune.settings$tune.args
+evalPreds <- e@predictions
+```
+
+```{asis, echo = viz.any, eval = viz.any, include = viz.any}
+### ニッチモデルを視覚化する
+Below are some visualizations of your modeling analysis results.
+```
+
+```{r respCurvJav, echo = viz.resp & '{{algMaxent}}' == "maxent.jar", include = viz.resp}
+# 係数がゼロ以外の環境変数の応答曲線を表示する
+dismo::response(evalMods[["{{modSel}}"]], var = {{mxNonZeroCoefs}})
+```
+
+```{r respCurvMaxnet, echo = viz.resp & '{{algMaxent}}' == "maxnet", include = viz.resp, warning = F, message = F}
+# 係数がゼロ以外の環境変数の応答曲線を表示する
+plot(evalMods[["{{modSel}}"]], vars = {{mxNonZeroCoefs}}, type = "cloglog")
+```
+
+```{r bcPlot, echo = viz.bcPlot, include = viz.bcPlot}
+# BIOCLIMエンベローププロットを表示
+plot(evalMods[['bioclim']], a = {{bcPlot1}}, b = {{bcPlot2}}, p = {{bcPlotP}})
+```
+
+```{r evalPlot, echo = viz.mxEval, include = viz.mxEval}
+# ENMevalの結果を表示する
+ENMeval::evalplot.stats(e, stats = "{{mxEvalSel}}", "rm", "fc")
+```
+
+```{r mapPred, echo = viz.pred, include = viz.pred}
+# モデルリストからモデルを選択します。
+mod <- evalMods[["{{modSel}}"]]
+```
+
+```{r, echo = viz.pred & mod.bioclim, include = viz.pred}
+# 生物気候予測を生成する
+pred <- evalPreds[["{{modSel}}"]]
+```
+
+```{r, echo = viz.pred.raw, include = viz.pred.raw}
+# 生の予測を生成する
+pred <- evalPreds[["{{modSel}}"]]
+```
+
+```{r maxnetLog, echo = viz.pred.log & alg.maxnet, include = viz.pred.log}
+# ロジスティック予測の生成
+pred <- predictMaxnet(mod, envsBgMsk, type = 'logistic', clamp = {{clamp}})
+```
+
+```{r maxnetCll, echo = viz.pred.cll & alg.maxnet, include = viz.pred.cll}
+# cloglog予測を生成する
+pred <- predictMaxnet(mod, envsBgMsk, type = 'cloglog', clamp = {{clamp}}) 
+```
+
+```{r maxentLog, echo = viz.pred.log & alg.maxent, include = viz.pred.log}
+# ロジスティック予測の生成
+pred <- dismo::predict(mod, envsBgMsk, args = c("outputformat=logistic"))
+```
+
+```{r maxentCll, echo = viz.pred.cll & alg.maxent, include = viz.pred.cll}
+# cloglog予測を生成する
+pred <- dismo::predict(mod, envsBgMsk, args = c("outputformat=cloglog")) 
+```
+
+```{r, echo = viz.pred.thr, include = viz.pred.thr}
+# 在データグリッドセルの予測値を取得する
+occPredVals <- raster::extract(pred, occs.xy)
+# 最小トレーニングプレゼンスしきい値を定義する
+thr <- thresh(occPredVals, "{{comp7.thresh}}")
+# しきい値モデルの予測
+pred <- pred > thr
+```
+
+```{r, echo = viz.pred, include = viz.pred}
+# モデル予測をプロットする
+plot(pred)
+```
+
+```{asis, echo = pj.any, eval = pj.any, include = pj.any}
+### ニッチモデルの投影
+You selected to project your model. First define a polygon with the coordinates you chose, then crop and mask your predictor rasters. Finally, predict suitability values for these new raster cells based on the model you selected.
+```
+
+```{r projSel, echo = pj.any, include = pj.any}
+projCoords <- data.frame(x = {{occsPjX}}, y = {{occsPjY}})
+projPoly <- sp::SpatialPolygons(list(sp::Polygons(list(sp::Polygon(projCoords)), ID=1)))
+```
+
+```{asis, echo = pj.area & alg.maxnet, eval = pj.area, include = pj.area}
+### ニッチモデルを新しい空間に投影する
+Now use crop and mask the predictor variables by projPoly, and use the maxnet.predictRaster() function to predict the values for the new extent based on the model selected.
+```
+
+```{r projAreaMaxnet.raw, echo = pj.area & alg.maxnet & viz.pred.raw, include = pj.area}
+predsProj <- raster::crop(envs, projPoly)
+predsProj <- raster::mask(predsProj, projPoly)
+proj <- predictMaxnet(mod, predsProj, type = 'exponential', clamp = {{clamp}})
+```
+
+```{r projAreaMaxnet.log, echo = pj.area & alg.maxnet & viz.pred.log, include = pj.area}
+predsProj <- raster::crop(envs, projPoly)
+predsProj <- raster::mask(predsProj, projPoly)
+proj <- predictMaxnet(mod, predsProj, type = 'logistic', clamp = {{clamp}})
+```
+
+```{r projAreaMaxnet.cll, echo = pj.area & alg.maxnet & viz.pred.cll, include = pj.area}
+predsProj <- raster::crop(envs, projPoly)
+predsProj <- raster::mask(predsProj, projPoly)
+proj <- predictMaxnet(mod, predsProj, type = 'cloglog', clamp = {{clamp}})
+```
+
+```{asis, echo = pj.area & alg.maxent, eval = pj.area, include = pj.area}
+### ニッチモデルを新しい空間に投影する
+Now use crop and mask the predictor variables by projPoly, and use the dismo::predict() function to predict the values for the new extent based on the model selected.
+```
+
+```{r projAreaMaxent.raw, echo = pj.area & alg.maxent & viz.pred.raw, include = pj.area}
+predsProj <- raster::crop(envs, projPoly)
+predsProj <- raster::mask(predsProj, projPoly)
+proj <- dismo::predict(mod, predsProj, args = c("outputformat=raw"))
+```
+
+```{r projAreaMaxent.log, echo = pj.area & alg.maxent & viz.pred.log, include = pj.area}
+predsProj <- raster::crop(envs, projPoly)
+predsProj <- raster::mask(predsProj, projPoly)
+proj <- dismo::predict(mod, predsProj, args = c("outputformat=logistic"))
+```
+
+```{r projAreaMaxent.cll, echo = pj.area & alg.maxent & viz.pred.cll, include = pj.area}
+predsProj <- raster::crop(envs, projPoly)
+predsProj <- raster::mask(predsProj, projPoly)
+proj <- dismo::predict(mod, predsProj, args = c("outputformat=cloglog"))
+```
+
+```{asis, echo = pj.area & mod.bioclim, eval = pj.area, include = pj.area}
+### ニッチモデルを新しい空間に投影する
+Now use crop and mask the predictor variables by projPoly, and use the dismo::predict() function to predict the values for the new extent based on the model selected.
+```
+
+```{r projAreaBioclim, echo = pj.area & mod.bioclim, include = pj.area}
+predsProj <- raster::crop(envs, projPoly)
+predsProj <- raster::mask(predsProj, projPoly)
+proj <- dismo::predict(mod, predsProj, useC = FALSE)
+```
+
+```{asis, echo = pj.time & alg.maxnet, eval = pj.time, include = pj.time}
+### ニッチモデルを新しい時間に投影する
+Now download the future climate variables chosen with *Wallace*, crop and mask them by projPoly, and use the maxnet.predictRaster() function to predict the values for the new time based on the model selected.
+```
+
+```{asis, echo = pj.time & alg.maxent, eval = pj.time, include = pj.time}
+### ニッチモデルを新しい時間に投影する
+Now download the future climate variables chosen with *Wallace*, crop and mask them by projPoly, and use the dismo::predict() function to predict the values for the new time based on the model selected.
+```
+
+```{asis, echo = pj.time & mod.bioclim, eval = pj.time, include = pj.time}
+### ニッチモデルを新しい時間に投影する
+Now download the future climate variables chosen with *Wallace*, crop and mask them by projPoly, and use the dismo::predict() function to predict the values for the new time based on the model selected.
+```
+
+```{r pTNet, echo = pj.time, include = pj.time}
+envsFuture <- raster::getData("CMIP5", var = "bio", res = {{bcRes}}, rcp = {{pjRCP}}, model = "{{pjGCM}}", year = {{pjYear}})
+
+predsProj <- raster::crop(envsFuture, projPoly)
+predsProj <- raster::mask(predsProj, projPoly)
+
+# 将来の気候変数名の名前を変更する
+names(predsProj) <- paste0('bio', sprintf("%02d", 1:19))
+# 気候変数を選択する
+predsProj <- raster::subset(predsProj, names(envs))
+```
+
+```{r pTNet.raw, echo = pj.time & alg.maxnet & viz.pred.raw, include = pj.time}
+# モデルを予測する
+proj <- predictMaxnet(mod, predsProj, type = 'exponential', clamp = {{clamp}})
+```
+
+```{r pTNet.log, echo = pj.time & alg.maxnet & viz.pred.log, include = pj.time}
+# モデルを予測する
+proj <- predictMaxnet(mod, predsProj, type = 'logistic', clamp = {{clamp}})
+```
+
+```{r pTNet.cll, echo = pj.time & alg.maxnet & viz.pred.cll, include = pj.time}
+# モデルを予測する
+proj <- predictMaxnet(mod, predsProj, type = 'cloglog', clamp = {{clamp}})
+```
+
+```{r pTEnt.raw, echo = pj.time & alg.maxent & viz.pred.raw, include = pj.time}
+# モデルを予測する
+proj <- dismo::predict(mod, predsProj, args = c('outputformat=raw'))
+```
+
+```{r pTEnt.log, echo = pj.time & alg.maxent & viz.pred.log, include = pj.time}
+# モデルを予測する
+proj <- dismo::predict(mod, predsProj, args = c('outputformat=logistic'))
+```
+
+```{r pTEnt.cll, echo = pj.time & alg.maxent & viz.pred.cll, include = pj.time}
+# モデルを予測する
+proj <- dismo::predict(mod, predsProj, args = c('outputformat=cloglog'))
+```
+
+```{r pTBioclim, echo = pj.time & mod.bioclim, include = pj.time}
+# モデルを予測する
+proj <- dismo::predict(mod, predsProj, useC = FALSE)
+```
+
+```{r, echo = pj.thr, include = pj.thr}
+# 在データグリッドセルの予測値を取得する
+occPredVals <- raster::extract(pred, occs.xy)
+# 最小トレーニングプレゼンスしきい値を定義する
+thr <- thresh(occPredVals, "{{comp8.thresh}}")
+# しきい値モデルの予測
+proj <- proj > thr
+```
+
+```{r, echo = pj.any, include = pj.any}
+# モデル予測をプロットする
+plot(proj)
+```
+
+```{asis, echo = pj.mess, eval = pj.mess, include = pj.mess}
+### 環境類似度の計算
+To visualize the environmental difference between the occurrence localities and your selected projection extent, calculate a multidimensional environmental similarity surface (MESS). High negative values mean great difference, whereas high positive values mean great similarity. Interpreting the projected suitability for areas with high negative values should be done with extreme caution, as they are outside the environmental range of the occurrence localities.
+```
+
+```{r projMESS, echo = pj.mess, include = pj.mess}
+
+# 在地点と背景から環境値を抽出します-これらはモデルに入った値でした
+names(bg.xy) <- names(occs.xy)
+all.xy <- rbind(occs.xy, bg.xy)
+occEnvVals <- raster::extract(envs, all.xy)
+# これらの値を投影範囲（envsMsk）と比較します
+proj.mess <- dismo::mess(predsProj, occEnvVals)
+plot(proj.mess)
+```

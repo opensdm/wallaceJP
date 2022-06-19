@@ -1,0 +1,95 @@
+---
+title: "intro"
+output: html_document
+---
+
+### ***Wallace* とは？**
+
+*Wallace* へようこそ。*Wallace* は、再現性のある生態学的モデリングのための柔軟なアプリケーションで、この分野のコミュニティを拡げるために構築されました。現在のバージョンの*Wallace* (v1.1.3)では、データ取得から結果の可視化まで、ニッチ/分布モデリング分析の全てのステップをユーザーに案内します。
+
+このアプリケーションは `R` で書かれており、Rのウェブアプリ開発パッケージ `shiny` を使用しています。安定版の *Wallace* は <a href='https://CRAN.R-project.org/package=wallace' target='_blank'>CRAN</a> に、開発版は <a href='https://github.com/wallaceEcoMod/wallace' target='_blank'>Github</a> にあります。また、私たちは *Wallace* <a href='https://wallaceecomod.github.io/' target='_blank'>website</a> を維持しています。このサイトには基本的な情報やリンクがあり、近い将来チュートリアルの資料も更新される予定です。
+
+*Wallace* は生物多様性の空間的研究を促進するために設計されており、現在は発生データセットと環境予測変数を用いた種のニッチと分布のモデル化に注力しています。これらのモデルは、環境条件に対する種の反応を推定するものであり、種に適した地域を示す地図を作成するために使用することができる（すなわち、種の潜在的な地理的分布を示すマップを作成するために使用することができる；Guisan & Thuiller 2005; Elith & Leathwick 2009; Franklin 2010a; Peterson et al. 2011）。この研究分野は過去 20 年間で飛躍的に成長し、保全生物学（Franklin 2010b）、侵略種（Ficetola et al. 2007）、人獣共通感染症（Gonzテレス et al. 2010）、気候変動の影響（Kearney et al. 2010）などの差し迫った環境問題に応用されている。
+
+また、より詳しくは、Methods in Ecology and Evolutionの論文を参照してください。
+
+Kass J. M., Vilela B., Aiello-Lammens M. E., Muscarella R., Merow C., Anderson R. P. (2018). Wallace: A flexible platform for reproducible modeling of species niches and distributions built for community expansion. *Methods Ecol Evol*. 2018. 9: 1151-1156. <a href="https://doi.org/10.1111/2041-210X.12945" target="_blank">DOI: 10.1111/2041-210X.12945</a>
+
+### ***Wallace* は誰のためのものか？**
+
+*Wallace* は、大学院生、生態学者、自然保護の実践者、自然資源管理者、教育者、プログラマーを含む幅広い人々に使ってもらえるように設計されています。プログラミング能力に関係なく、誰でも*Wallace* を使って解析を行い、手法を学び、結果を共有することができます。また、ある手法を普及させたい人は、*Wallace* 用のモジュールを作成することができます。
+
+### ***Wallace* の特徴**
+
+* **<span style='color:blue'>オープンソース</span>**: このコードは自由に使用・変更できます (GPL 3.0)。
+
+* **<span style='color:blue'>拡張性</span>**:  ユーザーは、新しい方法についてのオプションを可能にするモジュールを作成したり、投稿したりすることができます。
+
+* **<span style='color:blue'>柔軟性</span>**: ユーザーによるアップロードと結果のダウンロードのためのオプション。
+
+* **<span style='color:blue'>双方向性</span>**:ズーム可能な `リーフレット` マップ、ソート可能な `DF` データ テーブル、および結果の可視化が含まれています。
+
+* **<span style='color:blue'>学習支援</span>**:  ワークフローの各ステップの理論的および分析的な側面について、ユーザーの学習に役立つガイダンステキストを搭載しています。
+
+* **<span style="color:blue">再現可能</span>**: ユーザーは `rmarkdown` .Rmd ファイルをダウンロードすることができ、このファイルを実行することで解析を再現できます。
+
+### ***Wallace* のウェブサイト**
+
+詳細情報や関連リンクについては、<a href='https://wallaceecomod.github.io/' target='_blank'>website</a>を参照ください。
+
+### ***Wallace* に関するウェビナーを見る**
+
+*以下のウェビナーは 'Modelado de Distribuciones Potenciales' シリーズの一部であり、Angela Cuervoによって企画されました。*
+
+Kass, J. M. 9 May 2018. "WALLACE: A flexible platform for reproducible modeling of species niches and distributions built for community expansion." Broadcast from the City College of New York, City University of New York. <a href="https://www.youtube.com/watch?v=00CSd9vx2CE&feature=youtu.be" target="_blank">Watch on YouTube</a>.
+
+*The following webinar was part of the "Modelado de Distribuciones Potenciales" series, organized by Angela Cuervo.*
+
+Anderson, R. P. 21 May 2018. "El software Wallace para modelar nichos y distribuciones: Un coche con motor R, volante de ratón y cerebro de humano." Broadcast from the City College of New York, City University of New York. <a href="https://www.youtube.com/watch?v=0652g9PDKp4" target="_blank">Watch on YouTube</a>. 
+
+### ***Wallace* に貢献する**
+
+*Wallace* の開発に貢献してくださる場合、モジュールのオーサリングやUI、サーバーファイルなどの重要なコードの貢献については、*Wallace* <a href='https://github.com/wallaceEcoMod/wallace' target='_blank'>Github アカウント</a> にプルリクエストを送って下さい。また、Github に接続してコード関連の問題を投稿したり、<a href='https://groups.google.com/forum/#!forum/wallaceecomod' target='_blank'>Google グループ</a>に方法論的な質問やその他のより広い範囲の質問、アイディア、改善のための提案を投稿することもできます。
+
+### **連絡先**
+
+もし他に不明点があれば、 <a href='mailto:wallaceecomod@gmail.com'>メール下さい</a> 。
+
+<br>
+**-----------------------------------------------------**
+<br>
+
+#### **謝辞**
+
+このソフトウェアは、自然淘汰による進化の共同発見者であり、生物地理学の分野の創始者であるアルフレッド・ラッセル・ウォレスに捧げるものです。
+
+現在、*Wallace* は、米国国立科学財団DBI-1661510とNASA 80NSSC18K0406からの資金提供を受けて拡張されています。
+
+*Wallace* は、Global Biodiversity Information Facility (GBIF) の2015年エッベ・ニールセン・チャレンジに触発されて開発され、このチャレンジのファイナリストに選ばれ、賞金を獲得しました。
+
+本資料は、米国国立科学財団（NSF）および米国航空宇宙局（NASA）の助成金番号 NSF DBI-1661510（RPA）、DBI-1650241（RPA）、DBB-1119915（RPA）、DBB-1046328（MEA）、DBI-1401312（RM）、および NASA 80NSSC18K0406 により支援された研究に基づいています。本資料で表現されている意見、発見、結論、推奨事項はすべて著者のものであり、必ずしも米国科学財団やNASAの見解を反映しているわけではありません。
+
+その他の資金源としては、JMKに対するCUNYサイエンス奨学金とCUNY Graduate Center Provost Digital Innovation Grant、BVに対するブラジルのCoordination for the Improvement of Higher Education Personnel（CAPES）の博士課程助成金、Grisales-Betancurに対するコロンビアのAsociaciaciテウn Nacional de Empresariosのフェローシップ、Meenanに対するCity College Fellowsプログラムがあります。
+
+
+#### **参考文献**
+
+1. Anderson, R. P. (2012). Harnessing the world's biodiversity data: promise and peril in ecological niche modeling of species distributions. *Annals of the New York Academy of Sciences*. 1260: 66-80.
+
+2. Anderson, R. P. (2015). El modelado de nichos y distribuciones: no es simplemente "clic, clic, clic." [With English and French translations: Modeling niches and distributions: it's not just "click, click, click" and La modélisation de niche et de distributions: ce n'est pas juste "clic, clic, clic"]. *Biogeografía*. 8: 4-27.
+
+3. Elith J. & Leathwick J.R. (2009). Species distribution models: ecological explanation and prediction across space and time. *Annual Review of Ecology, Evolution, and Systematics*. 40: 677-697.
+
+4. Ficetola G.F., Thuiller W. & Miaud C. (2007) Prediction and validation of the potential global distribution of a problematic alien invasive species &horbar; the American bullfrog. *Diversity and Distributions*. 13: 476-485.
+
+5. Franklin J. (2010a). Mapping species distributions: spatial inference and prediction. Cambridge: Cambridge University Press.
+
+6. Franklin J. (2010b) Moving beyond static species distribution models in support of conservation biogeography. *Diversity and Distributions*. 16: 321-330.
+
+7. González, C., Wang, O., Strutz, S. E., González-Salazar, C., Sánchez-Cordero, V., & Sarkar, S. 2010. Climate change and risk of leishmaniasis in North America: predictions from ecological niche models of vector and reservoir species. *PLoS Neglected Tropical Diseases*. 4: e585.
+
+8. Guisan A. & Thuiller W. (2005). Predicting species distribution: offering more than simple habitat models. *Ecology Letters*. 8: 993-1009.
+
+9. Kearney M.R., Wintle B.A. & Porter W.P. (2010) Correlative and mechanistic models of species distribution provide congruent forecasts under climate change. *Conservation Letters*. 3: 203-213.
+
+10. Peterson A.T., Soberón J., Pearson R.G., Anderson R.P., Martinez-Meyer E., Nakamura M., Araújo M.B. (2011). Ecological niches and geographic distributions. Princeton, New Jersey: Monographs in Population Biology, 49. Princeton University Press.

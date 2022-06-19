@@ -1,0 +1,32 @@
+---
+title: "comp2_spatialThin"
+output: html_document
+---
+
+### **モジュール:** ***空間的な在データの間引き***
+
+**背景**
+
+種同定と位置情報に関するエラーの可能性の他に、在データでは地理的空間におけるサンプリングの不均一さ(つまりバイアス)がよく問題になります。道路や研究機関近辺にサンプリングが偏るのがその例です。また地理的バイアスのかかったサンプリングはしばしば環境空間でのバイアスを招き、研究対象種のニッチの推定に歪みをもたらします(Kadmon et al. 2004)。さらに、モデルの推定パフォーマンスを過大評価することにもなりかねません(Veloz 2009)。こうした問題は周知のことですが、この分野ではまだ(概念的にも実施方法的にも)、最良の対処方法について合意に達していません。しかしながら、この問題の対処方法の例として、1)調査努力量の地理的な不均質さを定量化する方法（例えば、同じ方法で分布調査がされた対象種群である「ターゲット群（target group）」の分布情報を用いて(Anderson 2003)、モデル構築時にその空間的な偏りを補正する方法 (Phillips et al. 2009)）などの現在Wallaceには実装されていない方法、あるいは2)地理的距離に基づいて在データを間引くことでサンプリングバイアスの影響を低減する方法(空間的間引き；Wallaceで実装されている方法)、または環境的距離に基づいて間引く方法(環境的間引き；Varela et al. 2014)があります。
+
+**実装**
+
+このモジュールを実装しているRパッケージの`spThin`は、他の在データから指定以下の地理的距離にある在データを除去します(Aiello-Lammens et al. 2015)。
+
+ `spThin`は、十分に(独立的に)反復して実行すると、最大限の地点数を維持しながら、互いの間の最短距離の制約を満たすデータセットを少なくとも１件生成します。このフィルタ距離はユーザーが専門的知識に基づいて指定することが多いですが、様々な最短距離を試してみて、最もモデルのパフォーマンスがよかった距離を選ぶことで、経験的に決めることもできます(Boria et al. 2014)。Wallaceでの操作では、spThinを100回繰り返すと、最大数の位置を保持した間引きデータセットが1件返されます。ユーザーはまた、在データのデータセットを元の地点セットにリセットして、異なるフィルタ距離を比較することもできます。最後に、間引きした地点セットのファイルを.csv形式でダウンロードすることができます。
+
+**引用文献**
+
+Aiello-Lammens M.E., Boria R.A., Radosavljevic A., Vilela B., Anderson R.P. (2015). spThin: an R package for spatial thinning of species occurrence records for use in ecological niche models. *Ecography*. 38: 541-545.
+
+Anderson R.P. (2003). Real vs. artefactual absences in species distributions: tests for *Oryzomys albigularis* (Rodentia: *Muridae*) in Venezuela. *Journal of Biogeography*. 30: 591-605.
+
+Boria R.A., Olson L.E., Goodman S.M., Anderson R.P. (2014). Spatial filtering to reduce sampling bias can improve the performance of ecological niche models. *Ecological Modelling*. 275: 73-77.
+
+Kadmon R., Farber O., Danin A. (2004). Effect of roadside bias on the accuracy of predictive maps produced by bioclimatic models. *Ecological Applications*. 14:401-413.
+
+Phillips S.J., Dudík M., Elith J., Graham C.H., Lehmann A., Leathwick J., Ferrier S. (2009). Sample selection bias and presence-only distribution models: implications for background and pseudo-absence data. *Ecological Applications*. 19:181-197.
+
+Varela S., Anderson R.P., García-Valdés R., Fernández-González F. (2014). Environmental filters reduce the effects of sampling bias and improve predictions of ecological niche models. *Ecography*. 37: 1084-1091.
+
+Veloz S.D. (2009). Spatially autocorrelated sampling falsely inflates measures of accuracy for presence-only niche models. *Journal of Biogeography*. 36: 2290-2299.

@@ -1,0 +1,26 @@
+---
+title: "comp1_dbOccs"
+output: html_document
+---
+
+### **モジュール:** ***データベース検索*** 
+
+**背景**  
+
+過去20年の間に、世界の生物多様性情報学コミュニティは驚くべき進歩を遂げ、各種の重要なデータベースを通じて、大量の位置情報(例：緯度／経度座標。Gaiji et al. 2013、Peterson et al. 2015、Walters and Scholes 2017)を含む、何百万という生物種の在データをオンラインで利用できるようになりました。これらのデータは特定の時点・地点における生物種の存在の記録で、他にも有用なメタデータが含まれているものもあります(例：研究機関、標本／観察番号、標高など)。これらの多くが自然史博物館や植物標本室における研究資料中の標本をソースとしていますが、市民科学イニシャティブなどの新しいデータソースからの寄与も増加しつつあります(Sullivan et al. 2009)。
+
+**実装** 
+
+このモジュールは、在データベースへのアクセスを効率化するRパッケージ`spocc`を利用して実装されています。ユーザーは最も一般的なデータベース3種(a href="http://www.gbif.org" target="_blank">GBIF</a>、<a href="http://www.vertnet.org" target="_blank">VertNet</a>、<a href="https://bison.usgs.gov" target="_blank">BISON</a>)のどれかを選択することができます。これらのデータベースは、無数の提供者からのデータを集約しています。ただし、現在のところ、3つのデータベースのうちどれか1つのみを選ばなければならず、後からダウンロードしたものは先にダウンロードしたものを上書きするので注意が必要です。
+
+*Wallace* は、解析に使用するレコードのうち、位置情報(緯度／経度座標)のないものや他のレコードと座標が完全に一致するもの(少数位の桁数を含む)をフィルタして取り除きます。フィルタされたレコードは「Occs Tbl」タブに、name(種名)、longitude(経度)、latitude(緯度)、year(記録年)、institutionCode(標本所蔵機関名)、country(国名)、stateProvince(地域名)、locality(地名)、elevation(標高)、および basisOfRecord (観測方法)の主要フィールドと共に表示されます。csv形式のファイルでダウンロード可能なレコードには元のフィールドがすべて含まれ、位置情報のないレコードも入っています。
+
+**引用文献**
+
+Gaiji, S., Chavan, V., Ariño, A. H., Otegui, J., Hobern, D., Sood, R., & Robles, E. (2013). Content assessment of the primary biodiversity data published through GBIF network: status, challenges and potentials. *Biodiversity Informatics*. 8: 94-172.
+
+Peterson, A. T., Soberón, J., & Krishtalka, L. (2015). A global perspective on decadal challenges and priorities in biodiversity informatics. *BMC Ecology*. 15: 15.
+
+Sullivan, B. L., Wood, C. L., Iliff, M. J., Bonney, R. E., Fink, D., & Kelling, S. (2009). eBird: A citizen-based bird observation network in the biological sciences. *Biological Conservation*. 142: 2282-2292.
+
+Walters, M., and Scholes, R. J., (Eds.). (2017). The GEO Handbook on Biodiversity Observation Networks. Springer International Publishing. Link: http://link.springer.com/book/10.1007/978-3-319-27288-7

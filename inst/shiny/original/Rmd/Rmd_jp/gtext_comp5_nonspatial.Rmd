@@ -1,0 +1,24 @@
+---
+title: "tab5_nonspatial"
+output: html_document
+---
+
+### **モジュール:** ***非空間的分割***
+
+**背景**
+
+非空間的分割はサンプリングバイアスがなく、モデルを別の時間または空間範囲に適用しない場合(あるいは空間分割を実施するには存在する位置が少な過ぎる場合)に有用です。
+
+**実装**
+
+このモジュールでは、Rパッケージの`ENMeval`の機能を利用して在データをトレーニングとテストのデータセットに分割します。
+
+これら非空間分割は次の２つのいずれかによります。すなわち、1)ジャックナイフ法と呼ばれる、在データの各レコードをそれぞれ別のグループ(グループ数kは地点の数に等しい；厳密的にはn-1ジャックナイフ)に入れるもので、サンプルサイズが小さい場合に適した方法(Pearson et al. 2007、Shcheglovitova and Anderson、2013)、または2)無作為k分割法と呼ばれる、各地点を無作為にグループに振り当てる(グループの数kはユーザーが定義)方法で、サンプルサイズが大きい場合に提案される手法です。これら分割方法について、詳しくはMuscarella et al. (2014)を参照してください。ユーザーは、この時点までの分析に残した在地点データに分割グループ番号の列（partition value）を加えた.csvファイルをダウンロードできます。このファイルには手順4: **環境データの処理**でサンプルした背景地点 (partition value = 0)も含まれています。
+
+**引用文献**
+
+Muscarella R., Galante P.J., Soley-Guardia M., Boria R.A., Kass J.M., Uriarte M., Anderson R.P. (2014). ENMeval: An R package for conducting spatially independent evaluations and estimating optimal model complexity for Maxent ecological niche models. *Methods in Ecology and Evolution*. 5: 1198-1205.
+
+Pearson, R. G., Raxworthy, C. J., Nakamura, M., & Townsend Peterson, A. (2007). Predicting species distributions from small numbers of occurrence records: a test case using cryptic geckos in Madagascar. *Journal of Biogeography*. 34: 102-117.
+
+Shcheglovitova, M. and R. P. Anderson. (2013). Estimating optimal complexity for ecological niche models: a jackknife approach for species with small sample sizes. *Ecological Modelling*. 269: 9-17.

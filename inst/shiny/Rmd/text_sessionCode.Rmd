@@ -1,0 +1,16 @@
+---
+title: "sessionCode"
+output: html_document
+---
+
+R パッケージ `rmarkdown` を使用すると、*Wallace* ユーザーは 現在のセッションで実行されるアクション (および基になるコード) の履歴をダウンロードできます。これには、複数のフォーマット (.Rmd (R Markdown)、.pdf、.html、または.doc) が含まれます。.Rmd 形式は、R セッションで実行した場合に分析を再現する実行可能な R スクリプト ファイルです。このファイルは、プレーンテキストとRコード「チャンク」で構成されています。
+
+RStudio には R Markdown ファイルのための拡張機能があります。RStudio で .Rmd を開き、右上の「実行」をクリックするだけで、チャンクごと、または一度にすべてのチャンクを実行することができます。詳細については、RStudio [チュートリアル](http://rmarkdown.rstudio.com/lesson-1.html)をご覧ください。
+
+#### 注意事項
+セッションコードのPDFを作成するには、動作するバージョンのTeXがインストールされている必要があります。
+以下の手順を実行してください。
+  
+1. Rstudioで `install.packages("tinytex")` を実行. このコマンドは、tinytexというRパッケージをインストールします。
+2. Rstudioで `tinytex::install_tinytex()` を実行. このコマンドは、TinyTeX本体をインストールします。
+

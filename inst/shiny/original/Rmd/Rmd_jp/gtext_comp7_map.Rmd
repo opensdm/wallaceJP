@@ -1,0 +1,28 @@
+---
+title: "tab7_pred"
+output: html_document
+---
+
+### **モジュール:** ***予測の地図化*** 
+
+**背景**  
+
+ニッチ／分布推定モデルは説明変数の関数で構成されており、大半の研究が地理的空間に関する予測に使用しています(Peterson et al. 2011)。ニッチ／分布推定モデリングのアルゴリズムは、ほとんどが連続値の予測を出力しますが、閾値を適用して在/不在の二値予測に変換することが可能です。閾値より上であれば、予測値は対象とする生物種が生息するのに十分な好適度であると考えられます。
+
+**実装** 
+
+このモジュールでは、モデル予測グリッドの機能の操作にRパッケージの`dismo`を使用します。
+
+ユーザーはまずモデルを選択します。手順6: **モデル化**で選択した`ENMeval`の設定によっては、Maxentの選択肢が複数になる場合があります。Wallaceは各セルについて説明変数に基づいてモデル出力を計算し、予測値を地図上にプロットします。Wallaceで閲覧できるMaxentモデルの出力スケールには「raw」、「logistic」、「cloglog」の3つがあります。「raw」は背景のピクセルの合計値を1と予測し、相対的に豊富であることを表しています(存在確率ではない。Phillips et al. 2017ならびにMerow et al. 2013を参照)。rawの値のlogisticとcloglogへの変換の範囲は0から1であり、在データのおよその確率を異なる仮定によって示します。logisticについては生物種の分布率が0.5に等しいと仮定し(Yackulic et al. 2012、Merow et al. 2013)、cloglogについては空間的な依存性とセルサイズに関して仮定します(Phillips et al. 2017)。 logisticとcloglogへの変換値は一般に似ていますが、cloglogは中間から高い範囲の値が高くなる傾向があります(Phillips et al. 2017)。
+
+次に、ユーザーは連続予測をバイナリ予測(0と1)に変換するための閾値設定ルールを選択することができますが、これは存在／不在または好適度／不好適度を示すと解釈できます。閾値設定ルールについて詳しくは、**手順6: モデル化**の手引書を参照してください。モデルと閾値を選択した後は、地図上に予測をプロットすることができ、予測値は分析に使用するラスタグリッドタイプ(.grdおよび.asc)か画像ファイル(.png)のどちらかの形式でダウンロードできます。
+
+**引用文献**
+
+Merow C., Smith M.J., Silander J.A. (2013). A practical guide to MaxEnt for modeling species' distributions: What it does, and why inputs and settings matter. *Ecography*. 36: 1058-1069.
+
+Peterson A. T., Soberón J., Pearson R. G., Anderson R. P., Martinez-Meyer E., Nakamura M., Araújo M. B. (2011). Modeling Ecological Niches, and Niches and Geographic Distributions. In: Ecological Niches and Geographic Distributions. Princeton, New Jersey: Monographs in Population Biology, 49. Princeton University Press.
+
+Phillips, S. J., Anderson, R. P., Dudík, M., Schapire, R. E. and Blair, M. E. (2017). Opening the black box: an open-source release of Maxent. *Ecography*. 40: 887-893.
+
+Yackulic, C. B., Chandler, R., Zipkin, E. F., Royle, J. A., Nichols, J. D., Campbell Grant, E. H., & Veran, S. (2013). Presence-only modelling using MAXENT: when can we trust the inferences?. *Methods in Ecology and Evolution*. 4: 236-243.

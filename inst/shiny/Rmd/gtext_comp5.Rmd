@@ -1,0 +1,18 @@
+---
+title: "comp5"
+output: html_document
+---
+
+### **手順5: 在データの分割**
+
+**背景**
+
+予測モデルの精度を評価するには、通常、独立したデータに基づいてテストする必要があります。しかし、ほとんどの生物多様性データセットについて真に独立したデータを取得するのは困難であり、研究者はしばしば単一のデータセットをサブセットに分割して使用します。在データは、1)モデルの構築に使用したレコード(「トレーニング」データまたは「較正」データ)と、２)評価用に留保した他のレコード(｢テスト｣データまたは「評価｣データ」の２つのカテゴリに分けられます(Guisan and Zimmermann 2000、Peterson et al. 2011)。広く使用されている手法であるk分割交差検証では、完全なデータセットを*k* 個のグループに分割し、１個を除くすべてのグループを使って繰り返しモデルを構築して、このモデルを先に除外したグループに対してテストします。この反復的なプロセスにより、*k* 個のモデルができます。モデル選択ではこれら*k* 個のモデルについて平均化した統計量を用い、選択されたモデル構造で、必要に応じてすべてのデータを使ったモデルを生成できます。
+
+ニッチ／分布モデリングのためのデータ分割には数多くの方法がありますが、主として1)***非空間分割***モジュールと2) ***空間分割***モジュールで紹介する２つのカテゴリに分けることができます。
+
+**引用文献**
+
+Guisan A., Zimmermann N.E. (2000). Predictive habitat distribution models in ecology. *Ecological Modelling*. 135: 147-186.
+
+Peterson A. T., Soberón J., Pearson R. G., Anderson R. P., Martinez-Meyer E., Nakamura M., Araújo M. B. (2011). Evaluating Model Performance and Significance. In: *Ecological Niches and Geographic Distributions*. Princeton, New Jersey: Monographs in Population Biology, 49. Princeton University Press.

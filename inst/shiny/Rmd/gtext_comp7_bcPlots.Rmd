@@ -1,0 +1,22 @@
+---
+title: "comp7_bcplots"
+output: html_document
+---
+
+### **モジュール:** ***BIOCLIMエンベローププロット*** 
+
+**背景**  
+
+**手順6: モデル構築**で述べたように、ニッチについてBIOCLIMアルゴリズムはハッチンソンの*n*次元ハイパーボリューム概念を実装したものです。この概念は環境エンベロープとも呼ばれるものです(Hutchinson 1957、Booth et al. 2014)。モデルは一般に「エンベローププロット」と呼ばれるプロットによって可視化することができます。エンベローププロットは、任意の2つの説明変数に対する環境空間において、在地点密度(つまり、予測の強度)を示すものです。
+
+**実装** 
+
+このモジュールでは、Rパッケージの`dismo`のプロット機能を使用します。
+
+エンベローププロットはResultsタブで閲覧できます。プロットの軸は異なる説明変数の範囲を表すもので、ユーザーはこれらの軸を変更することで、2つの環境変数を自在に組合せて閲覧することができます。さらに、エンベロープの閾値も各変数のパーセンタイル分布の両端をトリミングすることで変更することができます(詳細はモジュール **BIOCLIM**を参照)。表示中のBIOCLIMエンベローププロットは、画像ファイル(.png)としてダウンロードできます。
+
+**引用文献**
+
+Booth T.H., Nix H.A., Busby J.R., Hutchinson M.F. (2014). BIOCLIM: The first species distribution modelling package, its early applications and relevance to most current MaxEnt studies. *Diversity and Distributions*. 20: 1-9.
+
+Hutchinson, G.E. (1957). Concluding remarks. *Cold Spring Harbor Symposia on Quantitative Biology*. 22: 415-427.

@@ -1,0 +1,51 @@
+---
+title: "comp6"
+output: html_document
+---
+
+### **手順6: モデル構築**
+
+生物種のニッチ／分布についてモデルを構築するため、さらにはこれらを評価するための方法やアルゴリズムが数多く存在します(Guisan and Thuiller, 2005、Elith et al. 2006、Franklin 2010 chaps. 6, 7, 8)。手順6: **モデル構築**は先に使用した手順の出力情報を使い、在のみ（presence-only）または在-背景データ(presence-background)、および関連する環境情報を使ってモデルを構築します。Wallaceでは現在、ユーザーは1)在のみデータによるアプローチであるBIOCLIM (モジュール ***BIOCLIM***)、または2)在－背景アルゴリズムであるMaxent(モジュール ***Maxent***)のいずれかを使ってモデルを構築することができます。
+
+前に触れたように、ニッチ／分布モデルのパフォーマンスを評価するために各種の評価統計量が存在し、その多くは評価のために保留したテスト用地点をモデルが予測する能力に基づいています(Peterson et al. 2011)。これら保留した地点は「テスト｣地点と呼ばれ、モデルを構築するのに使われる地点は「トレーニング｣地点と呼ばれます。*Wallace* は**手順6: モデル構築**の中でいくつかの一般に使用される評価統計量、すなわちAUC、omission率(訳注：実際の在地点のうち、誤って不在と予測されてしまった地点の割合)、およびAICの表を出力します。
+
+**AUC**とは、受信者操作特性(ROC)プロットの曲線よりも下にある部分の面積(Area Under the Curve)を指します。AUCは分類子(ここではモデル)の好適度の値全体にわたって、陽性の値のレコードを陰性の値のレコードより高くランクする能力をノンパラメトリックに測定したもので、したがってモデルの弁別的な能力を判断します。AUCの範囲は0から1ですが、真の陰性のデータ(不在など)が存在しない場合、AUCの解釈において非常に難しい問題が起きます(Lobo et al. 2008、Peterson et al. 2008、Peterson et al. 2011 chap. 9)。*Wallace* で構築できるニッチ／分布モデルは「在のみまたは在－背景」であるので、AUC値は相対的なパフォーマンス指標(同じアルゴリズムの異なる設定、特定種の同じデータセットなどの間での比較)にのみ使用されるべきです。*Wallace* ではどちらにも`ENMeval`を使用しています。すなわち、1)すべての在データの位置によって構築したモデルを使ってAUCを計算し、それを同じレコード、つまりトレーニング地点で「評価」(フルAUC)し、2) *k* 倍交差検証の繰り返しごとにAUCを別個に計算し、トレーニング地点によって構築した各モデルを使い、テスト地点に基づく評価(テストAUCの算出)を行い、かつ3) *k* 倍交差検証の繰り返しごとに、トレーニングAUCとテストAUCの差を求めます(AUC diff)。テストAUCは、実際にAUCを適用する場合の標準的な方法であり、特に他の区域／時点についてモデルを投影する場合に重要です(Roberts et al. 2017)。過剰適合したモデルはテストデータよりもトレーニングデータについてより良いパフォーマンスを発揮するので、AUC diffの値が高い場合はモデルの過剰適合が高いことを示していると言えます(Warren and Seifert 2011)。AUCに関連するResults表には以下の5つのフィールドがあります。
+ +	full.AUC: すべての在地点を使用して計算したAUC値
+ +	auc.val.avgおよびauc.val.sd：*k* テストAUCの平均と分散（パーティションごとに1つ）
+ +	auc.diff.avgおよびauc.diff.sd：*k* トレーニングと検証AUC間のすべての差異の平均と分散
+
+省略率(**OR**)は、バイナリ分類子(ここではモデル)のテスト位置の予測能力を、連続した、または順序によるモデル予測に通常閾値を適用した後で評価する方法です(モジュール **予測の地図化**を参照)。閾値を適用することで二値予測 (例えば0および1)を作り、オミッション率は0の値（不在）と予測されたグリッドセルに入るテスト地点（実測の在データ）の割合に等しくなります(すなわち閾値未満の在データの割合。Peterson et al. 2011)。ORが0ということは予測から外れる地点がないこと、ORが１の場合はすべてが外れることをそれぞれ意味します。閾値の設定については多くの方法がありますが、*Wallace* では、一般に使用されている最小トレーニング在(MTP)と10パーセンタイルトレーニング在(10pct)の2つを使用します。MTPはモデルの構築に使用した在地点の好適度スコア（予測値）の最低値、10pctはこれらの地点について好適度が低いほうから10％を除外した後の最低好適度スコアです。したがって、10pctはMTPに比べてより厳格です。AUCの場合と同様、*Wallace* は分割領域ごとにORを計算します。これには連続予測に閾値を適用し、結果のバイナリ予測外になるテスト位置の割合を算出します。ORに関するResults表には以下の4つのフィールドがあります。
+ +	or.mtp.avg and or.mtp.sd: すべての検証MTP欠落率の平均と標準偏差
+ +	or.10p.avgおよびor.10p.sd：すべての検証10pctの欠落率の平均および標準偏差
+
+**AIC**は「赤池情報量規準」のことで、回帰ベースのモデルにおいてよく使われるモデル評価基準です。AICの値が最低のモデルが候補モデルの中で最適なものと識別されます。計算は次の式で行われます。
+
+$AIC = 2k - 2ln(L)$
+
+ここでは、k=モデルのパラメータ数 (ここではkは*Wallace* の他の部分*k* 倍分取に使われているものとは意味が異なるので注意) であり、In(L)はモデルの対数尤度です。パラメータの多いモデルでは第1項により大きな陽性数があり、尤度の高いものは第2項でより大きな陰性数があります。したがって、パラメータの少ない単純なモデルと尤度の高いモデルは、どちらもAICスコアが低くなります。例えば、2つのモデルがほぼ同じ尤度であるとすると、パラメータが少ない方がAICのスコアが低くなります。こうすることで、AICは複雑なモデルには不利ですが、また同時に尤度の高い複雑なモデルには有利になります。これは複雑性と適合性の間の最適の均衡点を発見するためです(Burnham and Anderson 2002)。Maxentについては、*Wallace* はWarren and Seifert (2011)にて概説されている方法を使用して (有限のサンプルサイズに合わせて修正したもの) AICcを計算します。BIOCLIMについてのAICは計算しません。AICは完全モデルのみについて計算され、したがって分割については考慮していません。AICに関する
+ +	nparm: モデル中のパラメータの数(Maxentでは変数の特徴も含まれる(例：bio1の4つのヒンジは4変数、bio11の二次項は2変数を意味するなど)
+ +	AICc
+ +	delta.AICc: 最低AICｃと各AICｃの間の絶対値差分(例：delta.AICc=0 はAICｃが最低値のモデル)
+ +	w.AIC: すべてのモデルにわたって、相対的なモデルの尤度の平均として計算されたAICウェイト(exp(-0.5 * delta.AICc))で、モデルの平均化に使用可能(Burnham and Anderson 2002) 
+
+ニッチ／分布モデルの評価においては、(特に不在データがない場合)単一の「最良」の方法はありません。したがって、*Wallace* はいくつかの方法を提示し、ユーザーがそれぞれの研究目的に合うかを判断できるようにしています。シーケンスとして実行した場合、現行モデルの結果は前回モデルの結果に上書きされます。将来のリリースでは、他のモデリング手法を実施する新たなモジュールを加えて、このコンポーネントを大幅に拡大することを想定しています。
+
+**引用文献**
+
+Burnham, K. P., and D. R. Anderson. (2002). *Model selection and multimodel inference : a practical information-theoretic approach*. Springer, New York.
+
+Elith J., Graham C.H., Anderson R.P., Dudík M., Ferrier S., Guisan A., Hijmans R.J., Huettmann F., Leathwick J.R., Leahmann A., Li J., Lohmann L.G., Loiselle B.A., Manion G., Moritz C., Nakamura M., Nakazawa Y., Overton J.M., Peterson A.T., Phillips S.J., Richardson K.S., Scachetti-Pereira R., Schapire R.E., Soberón J., Williams S., Wisz M.S., Zimmermann N.E. 2006. Novel methods improve prediction of species' distributions from occurrence data. *Ecography*. 29: 129-151.
+
+Franklin J. (2010). Mapping Species Distributions: Spatial Inference and Prediction. Statistical models - modern regression; Machine learning methods; Classification, similarity and other methods for presence-only data. In: Mapping species distributions: spatial inference and prediction. Cambridge: Cambridge University Press.
+
+Guisan A., Thuiller W. (2005). Predicting species distribution: offering more than simple habitat models. *Ecology Letters*. 8: 993-1009.
+
+Lobo, J. M., Jiménez-Valverde, A., & Real, R. (2008). AUC: a misleading measure of the performance of predictive distribution models. *Global Ecology and Biogeography*. 17: 145-151.
+
+Peterson, A. T., Papeş, M., & Soberón, J. (2008). Rethinking receiver operating characteristic analysis applications in ecological niche modeling. *Ecological Modelling*. 213: 63-72.
+
+Peterson A. T., Soberón J., Pearson R. G., Anderson R. P., Martinez-Meyer E., Nakamura M., Araújo M. B. (2011). Evaluating Model Performance and Significance. In: Ecological Niches and Geographic Distributions. Princeton, New Jersey: Monographs in Population Biology, 49. Princeton University Press.
+
+Roberts, D. R., Bahn, V., Ciuti, S., Boyce, M. S., Elith, J., Guillera-Arroita, G., Hauenstein, S., Lahoz-Monfort, J. J., Schröder, B., Thuiller, W., Warton, D. I., Wintle, B. A., Hartig, F. and Dormann, C. F. (2017), Cross-validation strategies for data with temporal, spatial, hierarchical, or phylogenetic structure. *Ecography*. 40: 913-929.
+
+Warren, D. L., & Seifert, S. N. (2011). Ecological niche modeling in Maxent : the importance of model complexity and the performance of model selection criteria. *Ecological Applications*. 21: 335-342.

@@ -1,0 +1,24 @@
+---
+title: "tab7_mxEvalPlots"
+output: html_document
+---
+
+### **モジュール:** ***Maxent評価プロット*** 
+
+**背景**  
+
+上記の**手順6: モデル構築**で述べたように、多くのニッチ／分布モデリングのアルゴリズムと同様、Maxentの出力もモデルの複雑さの設定によって大きく変化します(Merow et al. 2014)。そこで、Wallaceでは複雑さに関する設定をユーザーが「チューニング」することによって、複雑さと予測能力のバランスが最もよい設定を特定できるようにしています(Radosavljevic and Anderson 2014)。設定値に対する評価指標値の挙動のプロットを作成し視覚化することは、こうしたチューニングに役立ちます(Muscarella et al. 2014)。
+
+**実装** 
+
+このモジュールでは、Rパッケージの`ENMeval`のプロット機能を使用します。
+
+ユーザーは、Resultsタブでどの評価指標によるプロットを表示するか選択することができます。異なるフィーチャクラスは色分けされていて、正則化乗数はx軸に、評価指標の値はy軸にそれぞれラベル表示されています。分散はエラーバーに表示されます。表示中のMaxent 評価プロットは、画像ファイル(.png)としてダウンロードすることができます。
+
+**引用文献**
+
+Merow, C., Smith, M. J., Edwards, T. C., Guisan, A., McMahon, S. M., Normand, S., ... & Elith, J. (2014). What do we gain from simplicity versus complexity in species distribution models? *Ecography*, 37: 1267-1281.
+
+Muscarella, R., Galante, P. J., Soley-Guardia, M., Boria, R. A., Kass, J. M., Uriarte, M., & Anderson, R. P. (2014). ENMeval: An R package for conducting spatially independent evaluations and estimating optimal model complexity for Maxent ecological niche models. *Methods in Ecology and Evolution*. 5: 1198-1205.
+
+Radosavljevic, A., & Anderson, R. P. (2014). Making better Maxent models of species distributions: complexity, overfitting and evaluation. *Journal of Biogeography*. 41: 629-643.

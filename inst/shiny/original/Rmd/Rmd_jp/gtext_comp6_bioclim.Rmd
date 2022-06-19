@@ -1,0 +1,24 @@
+---
+title: "comp6_bioclim"
+output: html_document
+---
+
+### **モジュール:** ***BIOCLIM***
+
+**背景**
+
+BIOCLIMは生物種のニッチと分布を推定するための最も単純な手法の1つです。研究対象種が観察された環境(トレーニング地点の上限と下限)を座標軸ごとに独立に特徴づけることで、その環境エンベロープ(またはハッチンソンの*n*次元ハイパーボリューム。Booth et al. 2014)の範囲を定めます。環境エンベロープによって一般的に生育している条件(より好適と推定される条件)を示すために、BIOCLIMは各環境説明変数について、すべての在地点における環境値のパーセンタイル分布を生成します。それから、分析範囲全体（在地点およびbackground）の環境値について、パーセンタイル分布のどこに位置するかに基づいて環境値のランクを評価します(Hijmans and Graham 2006)。パーセンタイル分布の両端については同等と解釈し、中間パーセンタイル値に近いほど、より適した環境値であると考えられます。どの説明変数でも最小パーセンタイルスコア(観察された環境条件の全範囲)が手順7: **モデルの結果の可視化**のモジュール**予測の地図化**の地図に表示されます(下記参照)。
+
+**実装**
+
+BIOCLIMモデルの構築にはRパッケージの`dismo`を使用し、その結果をRパッケージの`ENMeval`から修正したカスタムコードによって評価します(Muscarella et al. 2014)
+
+*Wallace*は`dismo`で実装されたBIOCLIMを提供しています。BIOCLIMモデルは、手順5: **在データの分割**においてそれぞれトレーニングおよび評価用に割り当てた分割データを使用して構築、評価します。結果の表の行は計算した評価統計量に対応していて、“Bin”列は異なる分割データを表しています。ユーザーは評価統計量の表を.csvファイルとしてダウンロードすることができます。また、手順7: **モデルの結果の可視化**の、モジュール**BIOCLIMエンベローププロット**で、モデル構築の結果を図化して見ることもできます。
+
+**引用文献** 
+
+Booth T.H., Nix H.A., Busby J.R., Hutchinson M.F. (2014). BIOCLIM: The first species distribution modelling package, its early applications and relevance to most current MaxEnt studies. *Diversity and Distributions*. 20: 1-9.
+
+Hijmans, R. J., & Graham, C. H. (2006). The ability of climate envelope models to predict the effect of climate change on species distributions. *Global Change Biology*. 12: 2272-2281.
+
+Muscarella R., Galante P.J., Soley-Guardia M., Boria R.A., Kass J.M., Uriarte M., Anderson R.P. (2014). ENMeval: An R package for conducting spatially independent evaluations and estimating optimal model complexity for Maxent ecological niche models. *Methods in Ecology and Evolution*. 5: 1198-1205.

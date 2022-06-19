@@ -1,0 +1,22 @@
+---
+title: "comp4"
+output: html_document
+---
+
+### **手順4: 環境データの処理**
+
+**はじめに**
+
+ニッチ／分布モデリングに使用する¬環境データは様々に処理することができます。例えば、再分類(元のセルの値をクラス分けしなおす)、再サンプリング(セルのサイズ変更)、マスキング(グリッドを指定の形状に切り抜く)などがあります。現時点でこの手順4: **環境データの処理**は、重要なステップのひとつである、説明変数のグリッドをマスキングして分析対象地域を選択するステップに対応しています。これはモデルを構築する空間的範囲を定めるだけでなく、研究対象種の在地点との環境条件の対比に使用するデータの環境特性も決定します(「背景Background」データなど。Peterson et al. 2011 chap. 7；訳注)「背景」についてはVignetteの解説も参照のこと)。モデル構築の際の環境条件の範囲(および組合せ)の設定は、後で「非類似度」条件（訳注；モデル構築時の環境条件には含まれなかった、外挿となる環境条件。この後の手順8：モデルの投影、モジュール：環境類似度の計算で再出）に関係してきます(例えば、モデルを他の地域や期間に適用する際など；Williams and Jackson 2007)。
+
+*Wallace*では、研究対象地域を定義する方法の選択肢が4つあります。最初の3つは、モジュール ***分析範囲の選択***でのオプションで、1)在データの位置を囲む長方形の「境界ボックス」、2)在データの位置を囲んで描く最小面積の凸¬形状(最小凸多角形)、または3)在地点の周りのバッファがこれにあたります。あるいは、ユーザーは多角形(モジュール ***ユーザー指定のbackground範囲***)をアップロードすることができます。分析範囲の多角形はすべて、緯度経度で表したユーザー定義の距離によってバッファを与えることができます。
+
+分析範囲を設定する方法を選択(***Step 1***)した後、Wallaceは環境データからユーザーが指定した数の背景地点をサンプリングします(=pixels; ***Step 2***)。指定した数が選択した背景範囲での環境の幅に対して少ない場合、環境条件の一部がサンプルから漏れることがあります。そのような状態では、最終モデルで使用した変数によっては、背景範囲全体について予測を行う際に環境的外挿が必要になることがあります(**モデル構築**、**可視化**、**投影**の各手順を参照。Guevara et al. 2018)。
+
+**引用文献**
+
+Guevara, L., Gerstner, B. E., Kass, J. M., Anderson, R. P. (2018). Toward ecologically realistic predictions of species distributions: A cross-time example from tropical montane cloud forests. *Global Change Biology*. 24: 1511-1522.
+
+Peterson A. T., Soberón J., Pearson R. G., Anderson R. P., Martinez-Meyer E., Nakamura M., Araújo M. B. (2011). Modeling Ecological Niches. In: *Ecological Niches and Geographic Distributions*. Princeton, New Jersey: Monographs in Population Biology, 49. Princeton University Press.
+
+Williams, J. W., & Jackson, S. T. (2007). Novel climates, no-analog communities, and ecological surprises. *Frontiers in Ecology and the Environment*. 5: 475-482.

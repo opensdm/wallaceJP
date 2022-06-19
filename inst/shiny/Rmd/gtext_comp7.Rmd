@@ -1,0 +1,16 @@
+---
+title: "comp7"
+output: html_document
+---
+
+### **手順7: モデルの結果の可視化**
+
+**はじめに**
+
+ニッチ／分布モデルは、地理的空間における予測ができるとともに、モデルの応答を環境的空間において検討することができます(Elith and Graham 2009、Guisan and Zimmermann 2000)。手順7: **モデルの結果の可視化**では、ユーザーは双方の観点から可視化するオプションを選べます。Wallaceでは、1)BIOCLIMモデルに対しては二変数環境エンベローププロット(モジュール **BIOCLIMエンベローププロット**)、2) Maxentモデルの幅広い評価結果を示すプロット(モジュール **Maxent評価プロット**)、3)モデルの応答がどのように環境説明変数の変化と関連するかを示す応答曲線(モジュール **応答曲線のプロット**)、および‘4)分析範囲におけるモデル予測の地図(モジュール **予測の地図化**)のプロットがあり、いずれもResultsタブに表示されます。
+
+**引用文献**
+
+Elith, J., & Graham, C. H. (2009). Do they? How do they? WHY do they differ? On finding reasons for differing performances of species distribution models. *Ecography*. 32: 66-77.
+
+Guisan, A., & Zimmermann, N. E. (2000). Predictive habitat distribution models in ecology. *Ecological Modelling*. 135: 147-186.

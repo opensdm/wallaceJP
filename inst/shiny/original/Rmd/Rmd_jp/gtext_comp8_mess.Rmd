@@ -1,0 +1,26 @@
+---
+title: "tab7_respCurves"
+output: html_document
+---
+
+### **モジュール:** ***環境類似度の計算***
+
+**背景**  
+
+ニッチ／分布モデルを新しい条件に投影する際、新たな地域／時点には、しばしば(「非類似条件」と呼ばれる)生成された場所のものとは異なる環境値と組合せが含まれています。このような投影の現実的な利用には非類似条件の存在を検知して、環境空間への外挿が予測にどの程度の影響を及ぼすかを評価する必要があります(Williams and Jackson 2007、Fitzpatrick and Hargrove 2009, Anderson 2013)。こうした問題に対処する１つの方法が、多変量環境類似面(MESS)です(Elith et al. 2010)。高い正の値(地図の寒色部分)はモデルのトレーニングに使用した条件との類似度が増していることを示し、低い負の値(地図の暖色部分)は差異が拡大していることを示します。
+
+**実装** 
+
+このモジュールでは、Rパッケージの`dismo`の多次元の類似度面を計算する`mess()`関数を使用します(Elith et al. 2010)。
+
+ユーザーはまずモデルを選択します。手順6: **モデル化**で選択した`ENMeval`の設定によっては、Maxentの選択肢が複数になる場合があります。次に、地図上に多角形を描いてMESS計算を行う区域の輪郭を決めます。多角形を描いたら、Selectでこの範囲を選択し、Calculateで選択した範囲についてMESS分析を実行します。MESS地図は分析に使用するラスタグリッドタイプ(.grdおよび.asc)か画像ファイル(.png)のどちらかの形式でダウンロードできます。
+
+**引用文献**
+
+Anderson R.P. (2013). A framework for using niche models to estimate impacts of climate change on species distributions. *Annals of the New York Academy of Sciences*. 1297: 8-28.
+
+Elith, J., Kearney, M., & Phillips, S. (2010). The art of modelling range-shifting species. *Methods in Ecology and Evolution*. 1: 330-342.
+
+Fitzpatrick, M. C., & Hargrove, W. W. (2009). The projection of species distribution models and the problem of non-analog climate. *Biodiversity and Conservation*. 18: 2255-2261.
+
+Williams, J. W., & Jackson, S. T. (2007). Novel climates, no-analog communities, and ecological surprises. *Frontiers in Ecology and the Environment*. 5: 475-482.

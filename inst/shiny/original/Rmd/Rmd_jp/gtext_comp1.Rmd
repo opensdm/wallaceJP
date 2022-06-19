@@ -1,0 +1,18 @@
+---
+title: "comp1"
+output: html_document
+---
+
+### **手順１: 在データの取得**
+
+**はじめに**
+
+ニッチ／分布のモデリング分析にはその生物種について位置情報付きの(例：緯度／経度を伴う)在(occurrence)データを必要とします。現在、コンポーネント **在データの取得**は生物種の「存在(*presence*)」を記録したデータに主眼を置いています(つまり、不在（absence）または不検出(non-detection)の情報は扱いません。Franklin 2010 chap. 4、Peterson et al. 2011 chapter 5、Anderson 2012)。現在*Wallace*でユーザーが利用できるのは、1)一部のオンライン生物多様性データベースから在データを取得して結果をダウンロードするか(モジュール ***データベース検索***)、または2)ユーザー自身のデータセットをアップロードするか(モジュール ***ユーザー指定の在データ***)のどちらかです。 
+
+**引用文献**
+
+Anderson, R. P. (2012). Harnessing the world's biodiversity data: promise and peril in ecological niche modeling of species distributions. *Annals of the New York Academy of Sciences*. 1260: 66-80.
+
+Franklin J. (2010). Mapping Species Distributions: Spatial Inference and Prediction. Data for species distribution models: the biological data. In: Mapping species distributions: spatial inference and prediction. Cambridge: Cambridge University Press.
+
+Peterson A.T., Soberón J., Pearson R.G., Anderson R.P., Martinez-Meyer E., Nakamura M., & Araújo M.B. (2011). Species Occurrence Data. In: *Ecological Niches and Geographic Distributions*. Princeton, New Jersey: Monographs in Population Biology, 49. Princeton University Press.
