@@ -5,7 +5,7 @@ output: html_document
 
 ### ***Wallace* とは？**
 
-*Wallace* へようこそ。*Wallace* は、再現性のある生態学的モデリングのための柔軟なアプリケーションで、この分野のコミュニティを拡げるために構築されました。現在のバージョンの*Wallace* (v1.1.3)では、データ取得から結果の可視化まで、ニッチ/分布モデリング分析の全てのステップをユーザーに案内します。
+*Wallace* へようこそ。*Wallace* は、再現性のある生態学的モデリングのための柔軟なアプリケーションで、この分野のコミュニティを拡げるために構築されました。現在のバージョンの*Wallace* (v1.1.3-1)では、データ取得から結果の可視化まで、ニッチ/分布モデリング分析の全てのステップをユーザーに案内します。
 
 このアプリケーションは `R` で書かれており、Rのウェブアプリ開発パッケージ `shiny` を使用しています。安定版の *Wallace* は <a href='https://CRAN.R-project.org/package=wallace' target='_blank'>CRAN</a> に、開発版は <a href='https://github.com/wallaceEcoMod/wallace' target='_blank'>Github</a> にあります。また、私たちは *Wallace* <a href='https://wallaceecomod.github.io/' target='_blank'>website</a> を維持しています。このサイトには基本的な情報やリンクがあり、近い将来チュートリアルの資料も更新される予定です。
 

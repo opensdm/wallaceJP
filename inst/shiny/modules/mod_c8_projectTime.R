@@ -61,9 +61,12 @@ projectTime_MOD <- function(input, output, session, rvs) {
       return()
     }
     envsRes <- raster::res(rvs$envs)[1]
-    if (envsRes < 0.01) {
-      rvs %>% writeLog(type = 'error', i18n$t("Project to New Time currently only available with resolutions >30 arc seconds."))
-      return()
+    if (envsRes < 0.05) {
+    #  rvs %>% writeLog(type = 'error', i18n$t("Project to New Time currently only available with resolutions >30 arc seconds."))
+    #  return()
+       res = round(envsRes * 60 ,1)
+    } else {
+       res = as.integer(envsRes * 60)
     }
     
     # code taken from dismo getData() function to catch if user is trying to 
@@ -81,7 +84,7 @@ projectTime_MOD <- function(input, output, session, rvs) {
     }
     
     withProgress(message = paste(i18n$t("Retrieving WorldClim data for"), input$selTime, input$selRCP, "..."), {
-      projTimeEnvs <- raster::getData('CMIP5', var = "bio", res = envsRes * 60,
+      projTimeEnvs <- raster::getData('CMIP5', var = "bio", res = res,
                                       rcp = input$selRCP, model = input$selGCM, year = input$selTime)
       names(projTimeEnvs) <- paste0('bio', c(paste0('0',1:9), 10:19))
       # in case user subsetted bioclims

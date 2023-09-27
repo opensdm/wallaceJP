@@ -8,6 +8,7 @@ monofont: ipaexg.ttf
 ```{r setup, include=FALSE}
 library(knitr)
 knit_engines$set(asis = function(options) {
+  #browser()
   if (options$echo && options$eval) knit_child(text = options$code)
 })
 knitr::opts_chunk$set(message = FALSE, warning = FALSE, eval = FALSE)
@@ -59,16 +60,17 @@ viz.pred <- 'map' %in% rvs$comp7
 viz.mxEval <- 'mxEval' %in% rvs$comp7
 viz.bcPlot <- 'bcPlot' %in% rvs$comp7
 viz.resp <- 'resp' %in% rvs$comp7
-viz.any <- rvs$comp7 != ''
+viz.any <- rvs$comp7[length(rvs$comp7)] != ''
 # comp8
 pj.area <- rvs$comp8.pj == 'area'
 pj.time <- rvs$comp8.pj == 'time'
+pj.user <- rvs$comp8.pj == 'user'
 pj.mess <- rvs$comp8.esim == 'mess'
 pj.thr <- if (!(is.null(rvs$comp8.thr))) {!(rvs$comp8.thr == 'noThresh')} else {FALSE}
-pj.any <- pj.area | pj.time | pj.mess
+pj.any <- pj.area | pj.time | pj.user | pj.mess
 ```
 
-*Wallace* v1.1.3 セッションのRコード履歴は以下の通りです。
+*Wallace* v1.1.3-1 セッションのRコード履歴は以下の通りです。
 
 この R Markdown ファイルを RStudio で実行することで、セッションの結果を再現することができます。
 
@@ -91,7 +93,7 @@ library(dplyr)
 Wallaceには、異なるパッケージといくつかの追加機能を統合するために開発されたいくつかの関数も 含まれています。このため、ファイル`functions.R`をロードする必要があります。関数 'system.file()' がこのスクリプトを見つけ、'source()' がそれをロードします。
 
 ```{r loadFunctions}
-source(system.file('shiny/funcs', 'functions.R', package = 'wallace'))
+source(system.file('shiny/original/funcs', 'functions.R', package = 'wallaceJP'))
 ```
 
 ## *`r "{{spName}}"`*の解析結果.
@@ -603,9 +605,71 @@ proj <- dismo::predict(mod, predsProj, args = c('outputformat=cloglog'))
 proj <- dismo::predict(mod, predsProj, useC = FALSE)
 ```
 
+```{asis, echo = pj.user & alg.maxnet, eval = pj.user, include = pj.user}
+### ニッチモデルを新しい時間に投影する
+Now download the future climate variables chosen with *Wallace*, crop and mask them by projPoly, and use the maxnet.predictRaster() function to predict the values for the new time based on the model selected.
+```
+
+```{asis, echo = pj.user & alg.maxent, eval = pj.user, include = pj.user}
+### ニッチモデルを新しい時間に投影する
+Now download the future climate variables chosen with *Wallace*, crop and mask them by projPoly, and use the dismo::predict() function to predict the values for the new time based on the model selected.
+```
+
+```{asis, echo = pj.user & mod.bioclim, eval = pj.user, include = pj.user}
+### ニッチモデルを新しい時間に投影する
+Now download the future climate variables chosen with *Wallace*, crop and mask them by projPoly, and use the dismo::predict() function to predict the values for the new time based on the model selected.
+```
+
+```{r getprojectUserEnvs, echo = pj.user, include = pj.user}
+# 注意：ラスターァイルへのフルパスを指定してください
+d.penvs <- ''
+# ラスターファイルへのパスを作成する
+pUserRas.paths <- file.path(d.penvs, {{rvs$projectUserEnvs[1]}})
+# ラスターファイルからラスタースタックを作成する
+pUserEnvs <- raster::stack(pUserRas.paths)
+
+predsProj <- raster::crop(pUserEnvs, projPoly)
+predsProj <- raster::mask(predsProj, projPoly)
+```
+
+```{r pUNet.raw, echo = pj.user & alg.maxnet & viz.pred.raw, include = pj.user}
+# モデルを予測する
+proj <- predictMaxnet(mod, predsProj, type = 'exponential', clamp = {{clamp}})
+```
+
+```{r pUNet.log, echo = pj.user & alg.maxnet & viz.pred.log, include = pj.user}
+# モデルを予測する
+proj <- predictMaxnet(mod, predsProj, type = 'logistic', clamp = {{clamp}})
+```
+
+```{r pUNet.cll, echo = pj.user & alg.maxnet & viz.pred.cll, include = pj.user}
+# モデルを予測する
+proj <- predictMaxnet(mod, predsProj, type = 'cloglog', clamp = {{clamp}})
+```
+
+```{r pUEnt.raw, echo = pj.user & alg.maxent & viz.pred.raw, include = pj.user}
+# モデルを予測する
+proj <- dismo::predict(mod, predsProj, args = c('outputformat=raw'))
+```
+
+```{r pUEnt.log, echo = pj.user & alg.maxent & viz.pred.log, include = pj.user}
+# モデルを予測する
+proj <- dismo::predict(mod, predsProj, args = c('outputformat=logistic'))
+```
+
+```{r pUEnt.cll, echo = pj.user & alg.maxent & viz.pred.cll, include = pj.user}
+# モデルを予測する
+proj <- dismo::predict(mod, predsProj, args = c('outputformat=cloglog'))
+```
+
+```{r pUBioclim, echo = pj.user & mod.bioclim, include = pj.user}
+# モデルを予測する
+proj <- dismo::predict(mod, predsProj, useC = FALSE)
+```
+
 ```{r, echo = pj.thr, include = pj.thr}
 # 在データグリッドセルの予測値を取得する
-occPredVals <- raster::extract(pred, occs.xy)
+occPredVals <- raster::extract(proj, occs.xy)
 # 最小トレーニングプレゼンスしきい値を定義する
 thr <- thresh(occPredVals, "{{comp8.thresh}}")
 # しきい値モデルの予測
@@ -629,6 +693,6 @@ names(bg.xy) <- names(occs.xy)
 all.xy <- rbind(occs.xy, bg.xy)
 occEnvVals <- raster::extract(envs, all.xy)
 # これらの値を投影範囲（envsMsk）と比較します
-proj.mess <- dismo::mess(predsProj, occEnvVals)
+proj.mess <- suppressWarnings(dismo::mess(predsProj, occEnvVals))
 plot(proj.mess)
 ```

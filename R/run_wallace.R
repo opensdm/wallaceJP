@@ -19,6 +19,6 @@
 #'
 #' @export
 run_wallace <- function(launch.browser = TRUE, port = getOption("shiny.port")){
-  app_path <- system.file("shiny", package = "wallace")
+  app_path <- system.file("shiny", package = "wallaceJP")
   return(shiny::runApp(app_path, launch.browser = launch.browser, port = port))
 }

@@ -7,6 +7,8 @@ source("funcs/functions.R", local = TRUE)
 # shelf(dismo, dplyr, DT, ENMeval, jsonlite, knitr, leaflet, leaflet.extras, raster, RColorBrewer, rmarkdown, shinyjs, sp, spocc, zip)
 
 options(shiny.maxRequestSize=5000*1024^2)
+options(timeout=60*30)
+
 
 shinyServer(function(input, output, session) {
   # disable download buttons
@@ -131,6 +133,7 @@ shinyServer(function(input, output, session) {
       updateTabsetPanel(session, 'main', selected = 'Map')
       gtext$cur_comp <- "gtext_comp8.Rmd"
       if (input$projSel == 'projArea') gtext$cur_mod <- "gtext_comp8_pjArea.Rmd"
+	if (input$projSel == 'projUserEnvs') gtext$cur_mod <- "gtext_comp8_pjUser.Rmd"
       if (input$projSel == 'projTime') gtext$cur_mod <- "gtext_comp8_pjTime.Rmd"
       if (input$projSel == 'mess') gtext$cur_mod <- "gtext_comp8_mess.Rmd"
     }
@@ -369,8 +372,8 @@ shinyServer(function(input, output, session) {
     updateRadioButtons(session, "projSel", 
                        #choices = list("Project to New Extent" = 'projArea',
                        #               "Calculate Environmental Similarity" = 'mess'))
-                       choiceNames = list(i18n$t("Project to New Extent"), i18n$t("Calculate Environmental Similarity")),
-                       choiceValues = list('projArea', 'mess'))                 
+                       choiceNames = list(i18n$t("Project to New Extent"), i18n$t("User-specified"),i18n$t("Calculate Environmental Similarity")),
+                       choiceValues = list('projArea', 'projUserEnvs','mess'))                 
     # MAPPING - Plot the remaining occs after of removing NA
     map %>%
       clearMarkers() %>%
@@ -829,6 +832,32 @@ shinyServer(function(input, output, session) {
     req(rvs$projCur)
     rvs$projCurVals <- getVals(rvs$projCur, rvs$comp7.type)
     rvs$comp8.pj <- 'time'
+    raster::crs(rvs$projCur) <- raster::crs(rvs$bgMsk)
+    rasVals <- c(rvs$predCurVals, rvs$projCurVals)
+    rasCols <- c("#2c7bb6", "#abd9e9", "#ffffbf", "#fdae61", "#d7191c")
+    map %>% comp8_map(rvs$projCur, rvs$polyPjXY, bgShpXY, rasVals, 
+                      rasCols, "Predicted Suitability", 
+                      addID = 'rProjTime', clearID = c('r1ID', 'rProjArea', 'rProjTime', 'rProjMESS'))
+    
+    map %>% drawToolbarRefresh()
+    
+    shinyjs::enable("dlProj")
+  })
+
+  # module Project to User Environments
+  projUserEnvs <- callModule(projectUserEnvs_MOD, 'c8_projectUserEnvs', rvs)
+  
+  observeEvent(input$goProjectUserEnvs, {
+    projUserEnvs.call <- projUserEnvs()
+    req(projUserEnvs.call)
+    # stop if no model prediction
+    req(rvs$predCur)
+    # unpack
+    rvs$projMsk <- projUserEnvs.call[[1]]
+    rvs$projCur <- projUserEnvs.call[[2]]
+    req(rvs$projCur)
+    rvs$projCurVals <- getVals(rvs$projCur, rvs$comp7.type)
+    rvs$comp8.pj <- 'user'
     raster::crs(rvs$projCur) <- raster::crs(rvs$bgMsk)
     rasVals <- c(rvs$predCurVals, rvs$projCurVals)
     rasCols <- c("#2c7bb6", "#abd9e9", "#ffffbf", "#fdae61", "#d7191c")
