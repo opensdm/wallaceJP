@@ -2,6 +2,11 @@
 title: "about"
 output: html_document
 ---
+### **オープンSDM**（パッケージ名wallaceJP）は、**Wallace**の日本語版で、国立環境研究所のオープンSDMチームによって作られました。
+
+<a href="https://www.nies.go.jp/biology/aboutus/staff/ishihama_fumiko.html" target="_blank">石濱　史子</a>
+<a href="https://www.nies.go.jp/biology/aboutus/staff.html" target="_blank">趙　学群</a>
+<a href="https://www.nies.go.jp/researchers/300702.html" target="_blank">小出　大</a>
 
 #### **Wallace** は、国際的な生態学者のチームによって作られました。
 
