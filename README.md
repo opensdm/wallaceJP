@@ -2,17 +2,10 @@
 
 # wallaceJP (v1.1.3-1)
 
-これは国立研究開発法人国立環境研究所のOpen SDMプロジェクトにより作成された、wallace (v1.1.3-1)の日本語訳版です。
+これは国立研究開発法人国立環境研究所のOpen SDMプロジェクトにより作成された、wallace (v1.1.3-1)の日本語訳版です。インターフェースの日本語化に加え、将来予測時の環境変数として30arcminの高解像度データやユーザ指定のデータを使用可能とする改良を行っています。本パッケージの詳細およびインストール方法については、A-PLATウェブサイト掲載資料 (https://adaptation-platform.nies.go.jp/map/open_sdm.html) をご覧下さい。
 
 *Wallace* is a modular platform for reproducible modeling of species niches and distributions, written in R. The application guides users through a complete analysis, from the acquisition of data to visualizing model predictions on an interactive map, thus bundling complex workflows into a single, streamlined interface.
 
-Install *Wallace* via CRAN and run the application with the following R code.
-
-```R
-install.packages("wallace")
-library(wallace)
-run_wallace()
-```
 
 Development versions can be downloaded from Github with the following R code.
 
