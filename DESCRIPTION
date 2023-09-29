@@ -4,8 +4,8 @@ Date: 2023-10-04
 Title: A Modular Platform for Reproducible Modeling of Species Niches
         and Distributions
 Authors@R: c(
-  person("Jamie M.", "Kass", email = "jamie.kass@oist.jp", role = "aut"),
-  person("Gonzalo E.", "Pinilla-Buitrago", email = "gpinillabuitrago@gradcenter.cuny.edu", role = c("aut", "cre"),comment="wallace"),
+  person("Jamie M.", "Kass", email = "jamie.m.kass@gmail.com", role = "aut"),
+  person("Gonzalo E.", "Pinilla-Buitrago", email = "gepinillab@gmail.com", role = c("aut", "cre"),comment="wallace"),
 	person("Bruno", "Vilela", email = "bvilela@wustl.edu", role = "aut",comment="wallace"),
 	person("Matthew E.", "Aiello-Lammens", email = "matt.lammens@gmail.com", role = "aut",comment="wallace"),
 	person("Robert", "Muscarella", email = "bob.muscarella@gmail.com", role = "aut",comment="wallace"),
@@ -29,11 +29,32 @@ Author:
   Fumiko Ishihama [aut]
 Maintainer: Xuequn Zhao <zhao.xuequn@nies.go.jp>
 Depends: R (>= 3.5.0), leaflet (>= 2.0.2), shiny (>= 1.1.0)
-Imports: dismo, dplyr, DT (>= 0.4), ecospat, ENMeval (>= 2.0.0),
-        jsonlite, leaflet.extras, magrittr, raster, RColorBrewer,
-        rgeos, rgdal, rmarkdown, shinyjs, sp, spocc (>= 0.8.0), spThin,
-        zip, shiny.i18n
-Suggests: knitr, rgbif (>= 3.3.0), testthat, XML
+Imports: 
+ dismo,
+ dplyr,
+ DT (>= 0.4),
+ ecospat,
+ ENMeval (>= 2.0.0),
+ jsonlite,
+ leaflet.extras,
+ magrittr,
+ raster,
+ RColorBrewer,
+ rgeos,
+ rgdal,
+ rmarkdown,
+ shinyjs,
+ sp,
+ spocc (>= 0.8.0),
+ spThin,
+ zip,
+ shiny.i18n,
+ markdown
+Suggests: 
+ knitr,
+ rgbif (>= 3.3.0),
+ testthat,
+ XML
 Description: ‘wallacJP’ is the Japanese version of package 'wallace' translateed by National Institute for Environmental Studies, Japan. The 'shiny' application 'wallace' is a modular platform for reproducible modeling of species niches and distributions. 'wallace' guides users through a complete analysis, from the acquisition of species occurrence and environmental data to visualizing model predictions on an interactive map, thus bundling complex workflows into a single, streamlined interface.
 License: GPL-3
 URL: https://adaptation-platform.nies.go.jp/map/open_sdm.html, https://wallaceEcoMod.github.io
