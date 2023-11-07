@@ -12,6 +12,9 @@ Development versions can be downloaded from Github with the following R code.
 ```R
 install.packages("devtools")
 devtools::install_github("opensdm/wallaceJP")
+devtools::install_github("cran/rgdal")
+devtools::install_github("cran/rgeos")
+devtools::install_github("opensdm/wallaceJP")
 library(wallaceJP)
 run_wallace()
 ```
