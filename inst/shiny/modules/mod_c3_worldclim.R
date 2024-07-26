@@ -36,7 +36,7 @@ wcBioclims_MOD <- function(input, output, session, logs, mapCntr, envs) {
     
     withProgress(message = i18n$t("Retrieving WorldClim data..."), {
       if (input$bcRes == 0.5) {
-        wcbc <- raster::getData(name = "worldclim", var = "bio", res = input$bcRes, 
+        wcbc <- raster::getDataEx(name = "worldclim", var = "bio", res = input$bcRes, 
                                 lon = mapCntr()[1], lat = mapCntr()[2])
         rvs$bcLon <- mapCntr()[1]
         rvs$bcLat <- mapCntr()[2]
@@ -47,7 +47,7 @@ wcBioclims_MOD <- function(input, output, session, logs, mapCntr, envs) {
         rvs$bcSels[i] <- editNames
         wcbc <- wcbc[[input$bcSels]]
       } else {
-        wcbc <- raster::getData(name = "worldclim", var = "bio", res = input$bcRes)
+        wcbc <- raster::getDataEx(name = "worldclim", var = "bio", res = input$bcRes)
         wcbc <- wcbc[[input$bcSels]]
       }
     })
