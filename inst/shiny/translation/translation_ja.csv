@@ -195,7 +195,7 @@ Download Maxent evaluation plot (.png),Maxent評価プロット（.png）をダ�
 No statistic selected for plotting.,プロットに用いる統計量が選択されていません。
 BIOCLIM ran successfully and output evaluation results.,BIOCLIMは正常に実行され、評価結果が出力されました。
 Upload Occurrence CSV,在地点のCSVファイルをアップロード
-"Please input CSV file with columns ""name"", ""longitude"", ""longitude"".",「name」、「longitude」、「longitude」の列を含むCSVファイルを入力してください。
+"Please input CSV file with columns ""name"", ""longitude"", ""latitude"".",「name」、「longitude」、「latitude」の列を含むCSVファイルを入力してください。
 Project to new area or time first.,新しい時空間範囲への投影をまず行います。
 Generating MESS map...,MESSマップの生成中…
 Generated MESS map for present.,現在のMESSマップを生成しました。
@@ -281,7 +281,7 @@ No records with coordinates found in,座標を持つレコードが見つかり�
 for,for
 .,。
 Querying,検索中
-"Please input CSV file with columns 'name', 'longitude', 'latitude'.",「name」、「longitude」、「longitude」の列を含むCSVファイルを入力してください。
+"Please input CSV file with columns 'name', 'longitude', 'latitude'.",「name」、「longitude」、「latitude」の列を含むCSVファイルを入力してください。
 User-specified CSV file,ユーザー指定のCSVファイル
 with total of,合計で
 records with coordinates was uploaded.,座標付きのレコードがアップロードされました。
