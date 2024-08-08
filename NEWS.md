@@ -1,6 +1,6 @@
 # wallaceJP 1.1.3-1.1
 
-- Download Worldclim data
+- Download Worldclim and CMIP5 data
 
 # wallaceJP 1.1.3-1
 
