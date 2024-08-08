@@ -84,7 +84,7 @@ projectTime_MOD <- function(input, output, session, rvs) {
     }
     
     withProgress(message = paste(i18n$t("Retrieving WorldClim data for"), input$selTime, input$selRCP, "..."), {
-      projTimeEnvs <- raster::getData('CMIP5', var = "bio", res = res,
+      projTimeEnvs <- getDataEx('CMIP5', var = "bio", res = res,
                                       rcp = input$selRCP, model = input$selGCM, year = input$selTime)
       names(projTimeEnvs) <- paste0('bio', c(paste0('0',1:9), 10:19))
       # in case user subsetted bioclims
