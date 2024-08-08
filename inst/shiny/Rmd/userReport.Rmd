@@ -207,7 +207,7 @@ Using WorldClim (http://www.worldclim.org/) bioclimatic dataset at resolution of
 
 ```{r getEnvBC, echo = env.bc, include = env.bc}
 # WorldClim生物気候変数ラスターを取得する
-envs <- raster::getData(name = "worldclim", var = "bio", res = {{bcRes}}, lat = {{bcLat}}, lon = {{bcLon}})
+envs <- getDataEx(name = "worldclim", var = "bio", res = {{bcRes}}, lat = {{bcLat}}, lon = {{bcLon}})
 # 名前の変更ラスター変数
 envRes <- {{bcRes}}
 if (envRes == 0.5) {
@@ -559,7 +559,7 @@ Now download the future climate variables chosen with *Wallace*, crop and mask t
 ```
 
 ```{r pTNet, echo = pj.time, include = pj.time}
-envsFuture <- raster::getData("CMIP5", var = "bio", res = {{bcRes}}, rcp = {{pjRCP}}, model = "{{pjGCM}}", year = {{pjYear}})
+envsFuture <- getDataEx("CMIP5", var = "bio", res = {{bcRes}}, rcp = {{pjRCP}}, model = "{{pjGCM}}", year = {{pjYear}})
 
 predsProj <- raster::crop(envsFuture, projPoly)
 predsProj <- raster::mask(predsProj, projPoly)
