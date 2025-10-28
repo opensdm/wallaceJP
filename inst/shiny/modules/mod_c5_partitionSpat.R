@@ -42,7 +42,7 @@ partSp_MOD <- function(input, output, session, rvs) {
     rvs$aggFact <- input$aggFact
     
     occs.xy <- rvs$occs %>% dplyr::select(longitude, latitude)
-
+    #browser()
     if (input$partSpSel == 'block') {
       group.data <- ENMeval::get.block(occs.xy, rvs$bgPts)
       rvs %>% writeLog(i18n$t("Occurrences partitioned by block method."))

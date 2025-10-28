@@ -25,16 +25,16 @@ envSimilarity_MOD <- function(input, output, session, rvs) {
     bg.xy <- as.data.frame(rvs$bgPts)
     names(bg.xy) <- names(occs.xy)
     all.xy <- rbind(occs.xy, bg.xy)
-    
+    #browser()
     withProgress(message = i18n$t("Generating MESS map..."), {
-      trainingVals <- raster::extract(rvs$envs, all.xy)
-      pjMESS <- suppressWarnings(dismo::mess(rvs$projMsk, trainingVals))
+      trainingVals <- terra::extract(rvs$envs, all.xy, ID=FALSE)
+      pjMESS <- suppressWarnings(predicts::mess(rvs$projMsk, trainingVals))
       if (rvs$comp8.pj == 'area') {
         rvs %>% writeLog(i18n$t("Generated MESS map for present."))
       } else if (rvs$comp8.pj == 'time') {
-        rvs %>% writeLog(i18n$t("Generated MESS map for"), paste0('20', rvs$pjTimePar$year), 
-                         i18n$t("for GCM"), GCMlookup[rvs$pjTimePar$gcm], 
-                         i18n$t("under RCP"), as.numeric(rvs$pjTimePar$rcp)/10.0, i18n$t("."))
+        rvs %>% writeLog(i18n$t("Generated MESS map for"), rvs$pjTimePar$year, 
+                         i18n$t("for GCM"), rvs$pjTimePar$gcm, 
+                         i18n$t("under RCP"), rvs$pjTimePar$rcp)
       }
     })
     return(pjMESS)

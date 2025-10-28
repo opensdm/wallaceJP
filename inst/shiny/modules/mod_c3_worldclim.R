@@ -35,24 +35,38 @@ wcBioclims_MOD <- function(input, output, session, logs, mapCntr, envs) {
     rvs$bcSels <- input$bcSels
     
     withProgress(message = i18n$t("Retrieving WorldClim data..."), {
+      #browser()
       if (input$bcRes == 0.5) {
-        wcbc <- getDataEx(name = "worldclim", var = "bio", res = input$bcRes, 
-                                lon = mapCntr()[1], lat = mapCntr()[2])
+        # wcbc <- getDataEx(name = "worldclim", var = "bio", res = input$bcRes, 
+        #                         lon = mapCntr()[1], lat = mapCntr()[2])
+
+        wcbc <- geodata::worldclim_global(var = "bio",
+                                lon = mapCntr()[1],
+                                lat = mapCntr()[2],
+                                res = input$bcRes,
+                                path = getwd(),# tempdir(),
+                                version = "2.1")
+        
         rvs$bcLon <- mapCntr()[1]
         rvs$bcLat <- mapCntr()[2]
         # delete id tile (_*) from names for 30 sec rasters
-        i <- grep('_', names(wcbc))
-        editNames <- sapply(strsplit(names(wcbc)[i], '_'), function(x) x[1])
-        names(wcbc)[i] <- editNames
-        rvs$bcSels[i] <- editNames
-        wcbc <- wcbc[[input$bcSels]]
+        # i <- grep('_', names(wcbc))
+        # editNames <- sapply(strsplit(names(wcbc)[i], '_'), function(x) x[1])
+        # names(wcbc)[i] <- editNames
+        # rvs$bcSels[i] <- editNames
+        #wcbc <- wcbc[[input$bcSels]]
       } else {
-        wcbc <- getDataEx(name = "worldclim", var = "bio", res = input$bcRes)
-        wcbc <- wcbc[[input$bcSels]]
+        # wcbc <- getDataEx(name = "worldclim", var = "bio", res = input$bcRes)
+        wcbc <- geodata::worldclim_global(var = "bio",
+                                  res = input$bcRes,
+                                  path = getwd(), # tempdir(),
+                                  version = "2.1")
+        #wcbc <- wcbc[[input$bcSels]]
       }
     })
     
-    if (raster::nlayers(wcbc) == 19) {
+    # if (raster::nlayers(wcbc) == 19) {
+    if (terra::nlyr(wcbc) == 19) {
       bcSels <- 'bio1-19'
     } else {
       bcSels <- paste(names(wcbc), collapse = ", ")
@@ -61,11 +75,12 @@ wcBioclims_MOD <- function(input, output, session, logs, mapCntr, envs) {
                       bcSels, i18n$t("at"), input$bcRes, i18n$t(" arcmin resolution."))
     
     # change names if bio01 is bio1, and so forth
+    names(wcbc) <- gsub(".*_", "bio", names(wcbc))
     i <- grep('bio[0-9]$', names(wcbc))
     editNames <- paste('bio', sapply(strsplit(names(wcbc)[i], 'bio'), function(x) x[2]), sep='0')
     names(wcbc)[i] <- editNames
     rvs$bcSels[i] <- editNames
-    
+    #browser()
     return(wcbc)
   })
 }

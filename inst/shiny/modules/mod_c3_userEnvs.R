@@ -23,13 +23,13 @@ userEnvs_MOD <- function(input, output, session, rvs) {
     rvs$userEnvs <- input$userEnvs
     
     withProgress(message = i18n$t("Reading in rasters..."), {
-      uenvs <- raster::stack(input$userEnvs$datapath)
+      uenvs <- terra::rast(input$userEnvs$datapath)
       names(uenvs) <- fileNameNoExt(input$userEnvs$name)
     })
     
     rvs %>% writeLog(i18n$t("Environmental predictors: User input."))
     
-    if (is.na(raster::crs(uenvs))) {
+    if (is.na(terra::crs(uenvs))) {
       rvs %>% writeLog(type = "warning", i18n$t("Input rasters have undefined coordinate reference system (CRS). Mapping functionality in components Visualize Model Results and Project Model will not work. If you wish to map rasters in these components, please define their projections and upload again. See guidance text in this module for more details."))
     }
     

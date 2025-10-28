@@ -19,6 +19,8 @@ userOccs_MOD <- function(input, output, session, rvs) {
     csv <- read.csv(input$userCSV$datapath)
     
     spName <- trimws(as.character(csv$name[1]))
+
+    rvs$spName <- spName
     
     if (!all(c('name', 'longitude', 'latitude') %in% names(csv))) {
       rvs %>% writeLog(type = "error", i18n$t("Please input CSV file with columns 'name', 'longitude', 'latitude'."))

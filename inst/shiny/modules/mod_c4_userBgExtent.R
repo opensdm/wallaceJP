@@ -30,27 +30,33 @@ userBgExtent_MOD <- function(input, output, session, rvs) {
     pathfile <- basename(inPath)
     # get extensions of all input files
     exts <- sapply(strsplit(names, '\\.'), FUN=function(x) x[2])
-    
-    if (length(exts) == 1 & exts == 'csv') {
+
+    if (length(exts) == 1 && exts == 'csv') {
       # record for RMD
       rvs$comp4.shp <- 'csv'
       f <- read.csv(inPath, header = TRUE)
-      
-      bgExt <- sp::SpatialPolygons(list(sp::Polygons(list(sp::Polygon(f)), 1)))
+
+      # bgExt <- sf::as_Spatial(sf::st_sfc(sf::st_polygon(list(as.matrix(f))), crs = 4326))
+      bgExt <- sf::st_sfc(sf::st_polygon(list(as.matrix(f))), crs = 4326)
     } else if ('shp' %in% exts) {
       if (length(exts) < 3) {
         rvs %>% writeLog(type = 'error', i18n$t("If entering a shapefile, please select all the following files: .shp, .shx, .dbf."))
         return()
       }
-      file.rename(inPath, file.path(pathdir, names))
+      #file.rename(inPath, file.path(pathdir, names))
       # get index of .shp
       i <- which(exts == 'shp')
       shpName <- strsplit(names[i], '\\.')[[1]][1]
+      if (!file.exists(file.path(pathdir, names)[i])) {
+        file.rename(inPath, file.path(pathdir, names))
+      }
+      
       # record for RMD
       rvs$comp4.shp <- 'shp'
       rvs$bgUserShpPar <- list(dsn=pathdir[i], layer=shpName)
+      
       # read in shapefile and extract coords
-      bgExt <- rgdal::readOGR(pathdir[i], shpName)
+      bgExt <- terra::vect(paste0(pathdir[i],"/",shpName,".shp"))
     } else {
       rvs %>% writeLog(type = 'error', i18n$t("Please enter either a CSV file of vertex coordinates or shapefile (.shp, .shx, .dbf)."))
       return()
@@ -60,15 +66,23 @@ userBgExtent_MOD <- function(input, output, session, rvs) {
   })
   
   bufBg <- reactive({
-    req(userBgShp())
-    
     bufWid <- input$userBgBuf
+    bgExt_sf <- userBgShp()
     if (bufWid > 0) {
-      bgExt <- rgeos::gBuffer(userBgShp(), width = bufWid)
+      if ("SpatVector" %in% class(bgExt_sf)) {
+        bgExt <- terra::buffer(bgExt_sf, width = bufWid)
+      } else {
+        bgExt_vect <- sf::st_transform(bgExt_sf , crs = 3100)
+        bgExt <- sf::st_buffer(bgExt_vect, dist = bufWid * 111000)|>
+          sf::st_transform(crs = 4326)
+      }
       rvs %>% writeLog(i18n$t('Study extent buffered by'), bufWid, i18n$t('degrees.'))
     } else {
-      bgExt <- userBgShp()
+      bgExt <- bgExt_sf
     }
+    
+    bgExt <- sf::st_as_sf(bgExt)
+    bgExt <- sf::as_Spatial(bgExt)
     return(bgExt)
   })
   

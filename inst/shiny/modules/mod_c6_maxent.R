@@ -87,11 +87,22 @@ maxent_MOD <- function(input, output, session, rvs) {
    
     occs.xy <- rvs$occs %>% dplyr::select(longitude, latitude)
     colnames(rvs$bgPts) <- names(occs.xy)
-    e <- ENMeval::ENMevaluate(occ = occs.xy, env = rvs$bgMsk, bg.coords = rvs$bgPts,
-                              RMvalues = rms, fc = input$fcs, method = 'user', 
-                              occ.grp = rvs$occsGrp, bg.grp = rvs$bgGrp, 
-                              bin.output = TRUE, clamp = rvs$clamp,
-                              progbar = FALSE, updateProgress = updateProgress,
+    #browser()
+    tune.args <- list(fc = input$fcs, rm = rms)
+    # e <- ENMeval::ENMevaluate(occ = as.data.frame(occs.xy), env = rvs$bgMsk, bg.coords = rvs$bgPts,
+    #                           RMvalues = rms, fc = input$fcs, method = 'user', 
+    #                           occ.grp = rvs$occsGrp, bg.grp = rvs$bgGrp, 
+    #                           bin.output = TRUE, clamp = rvs$clamp,
+    #                           progbar = FALSE, updateProgress = updateProgress,
+    #                           algorithm = input$algMaxent)
+    # e <- ENMeval::ENMevaluate(occs = as.data.frame(occs.xy), envs = rvs$bgMsk, bg = rvs$bgPts,
+    #                           tune.args = tune.args, partitions = "block",
+    #                           updateProgress = updateProgress,
+    #                           algorithm = input$algMaxent)
+    e <- ENMeval::ENMevaluate(occs = as.data.frame(occs.xy), envs = rvs$bgMsk, bg = rvs$bgPts,
+                              tune.args = tune.args, partitions = "user",
+                              user.grp = list(occs.grp = rvs$occsGrp, bg.grp = rvs$bgGrp),
+                              updateProgress = updateProgress,
                               algorithm = input$algMaxent)
     
     if (rvs$clamp == T | rvs$algMaxent == "maxent.jar") {

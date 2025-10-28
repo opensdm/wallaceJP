@@ -20,8 +20,9 @@ projectArea_MOD <- function(input, output, session, rvs) {
     }
     
     # create new spatial polygon from coordinates
-    newPoly <- sp::SpatialPolygons(list(sp::Polygons(list(sp::Polygon(rvs$polyPjXY)), ID=rvs$polyPjID)))  
-    
+    # newPoly <- sp::SpatialPolygons(list(sp::Polygons(list(sp::Polygon(rvs$polyPjXY)), ID=rvs$polyPjID)))
+    #browser()
+    newPoly <- sf::as_Spatial(sf::st_sfc(sf::st_polygon(list(rvs$polyPjXY)), crs = 4326))
     # concatanate coords to a single character
     xy.round <- round(rvs$polyPjXY, digits = 2)
     xy.round <- xy.round[-nrow(xy.round),]  # remove last point that completes polygon
@@ -41,26 +42,30 @@ projectArea_MOD <- function(input, output, session, rvs) {
     
     
     withProgress(message = i18n$t("Masking environmental grids to projection extent..."), {
-      projMsk <- raster::crop(rvs$envs, newPoly)
-      projMsk <- raster::mask(projMsk, newPoly)
+      # projMsk <- raster::crop(rvs$envs, newPoly)
+      # projMsk <- raster::mask(projMsk, newPoly)
+      projMsk <- terra::crop(rvs$envs, newPoly)
+      projMsk <- terra::mask(projMsk, terra::vect(sf::st_as_sf(newPoly)))
     })
     
     modCur <- rvs$mods[[rvs$modSel]]
     
     withProgress(message = i18n$t("Projecting model to new area..."), {
       if (rvs$comp6 == 'bioclim') {
-        modProjArea <- dismo::predict(modCur, projMsk, useC = FALSE)
+        #modProjArea <- dismo::predict(modCur, projMsk, useC = FALSE)
+        modProjArea <- predicts::predict(projMsk, modCur)
       } else if (rvs$comp6 == 'maxent') {
         if (rvs$algMaxent == "maxnet") {
           if (rvs$comp7.type == "raw") {pargs <- "exponential"} else {pargs <- rvs$comp7.type}
           modProjArea <- predictMaxnet(modCur, projMsk, type = pargs, clamp = rvs$clamp)
         } else if (rvs$algMaxent == "maxent.jar") {
           pargs <- paste0("outputformat=", rvs$comp7.type)
-          modProjArea <- dismo::predict(modCur, projMsk, args = pargs)
+          #modProjArea <- dismo::predict(modCur, projMsk, args = pargs)
+          modProjArea <- predicts::predict(projMsk, modCur, args = pargs, clamp = rvs$clamp, na.rm = TRUE)
         }
       }
       
-      raster::crs(modProjArea) <- raster::crs(projMsk)
+      # raster::crs(modProjArea) <- raster::crs(projMsk)
       # generate binary prediction based on selected thresholding rule 
       # (same for all Maxent prediction types because they scale the same)
       modProjArea.thr.call <- callModule(threshPred_MOD, "threshPred", modProjArea)

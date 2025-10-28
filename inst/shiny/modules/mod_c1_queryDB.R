@@ -84,7 +84,7 @@ queryDb_MOD <- function(input, output, session, rvs) {
     recs <- dbOccs.coords()
     recs.dups <- duplicated(recs %>% dplyr::select(longitude, latitude))
     recs <- recs[!recs.dups,]
-    
+    rvs$genusName <- recs$genus[1]
     return(recs)
   })
   

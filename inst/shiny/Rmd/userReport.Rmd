@@ -7,6 +7,7 @@ monofont: ipaexg.ttf
 
 ```{r setup, include=FALSE}
 library(knitr)
+#debug(knit)
 knit_engines$set(asis = function(options) {
   #browser()
   if (options$echo && options$eval) knit_child(text = options$code)
@@ -29,6 +30,7 @@ env.bc <- rvs$comp3 == 'bc'
 env.user <- rvs$comp3 == 'user'
 env.any <- env.bc | env.user
 # comp4
+bg.Geodesic <- rvs$comp4.shp == 'bufDist'
 bg.bb <- rvs$comp4.shp == 'bb'
 bg.mcp <- rvs$comp4.shp == 'mcp'
 bg.ptbuf <- rvs$comp4.shp == 'ptbuf'
@@ -37,6 +39,14 @@ bg.userShp <- rvs$comp4.shp == 'shp'
 bg.user <- bg.userShp | bg.userCSV
 bg.any <- rvs$comp4.shp != ''
 bg.bufWid <- rvs$comp4.buf > 0
+#bg.bufDist <- ifelse(is.na(rvs$comp4.bufDist), 0, rvs$comp4.bufDist)
+bg.bufDist <- bgBufDist > 0
+#bg.tgb <- rvs$bgTgbs == 'tgb'
+bg.tgb <- if (!is.null(rvs$bgTgbs) && length(rvs$bgTgbs) > 0) {rvs$bgTgbs == 'tgb'} else {FALSE}
+#bg.envmask <- rvs$bgTgbs == 'envmask'
+bg.envmask <- if (!is.null(rvs$bgTgbs) && length(rvs$bgTgbs) > 0) {rvs$bgTgbs == 'envmask'} else {FALSE}
+#bg.usertgb <- rvs$bgTgbs == 'userbg'
+bg.usergp <- if (!is.null(rvs$bgTgbs) && length(rvs$bgTgbs) > 0) {rvs$bgTgbs == 'userbp'} else {FALSE}
 # comp5
 part.block <- rvs$comp5 == 'block'
 part.cb1 <- rvs$comp5 == 'cb1'
@@ -70,7 +80,7 @@ pj.thr <- if (!(is.null(rvs$comp8.thr))) {!(rvs$comp8.thr == 'noThresh')} else {
 pj.any <- pj.area | pj.time | pj.user | pj.mess
 ```
 
-*Wallace* v1.1.3-1 セッションのRコード履歴は以下の通りです。
+*Wallace* v1.1.3-1.3 セッションのRコード履歴は以下の通りです。
 
 この R Markdown ファイルを RStudio で実行することで、セッションの結果を再現することができます。
 
@@ -84,8 +94,6 @@ Wallace は以下の R パッケージを使用しています。
 ```{r loadPkgs}
 library(spocc)
 library(spThin)
-library(dismo)
-library(rgeos)
 library(ENMeval)
 library(dplyr)
 ```
@@ -164,11 +172,17 @@ The following code recreates the polygon used to select occurrences to keep in t
 
 ```{r occsSelect, echo = poccs.sel, include = poccs.sel}
 selCoords <- data.frame(x = {{occsSelX}}, y = {{occsSelY}})
-selPoly <- sp::SpatialPolygons(list(sp::Polygons(list(sp::Polygon(selCoords)), ID=1)))
+selPoly <- sf::st_polygon(list(as.matrix(selCoords)))
+# Create an sf object for the polygon
+selPoly.sf <- sf::st_sfc(selPoly, crs = 4326)
+# Extract coordinates from occs and convert to sf points
 occs.xy <- occs[c('longitude', 'latitude')]
-sp::coordinates(occs.xy) <- ~ longitude + latitude
-intersect <- sp::over(occs.xy, selPoly)
-intersect.rowNums <- as.numeric(which(!(is.na(intersect))))
+occs.sf <- sf::st_as_sf(occs.xy, coords = c("longitude", "latitude"), crs = 4326)
+# Perform spatial intersection
+intersect <- sf::st_intersects(occs.sf, selPoly.sf, sparse = FALSE)
+# Extract row numbers of intersecting points
+intersect.rowNums <- which(intersect)
+# Subset occs based on intersection
 occs <- occs[intersect.rowNums, ]
 ```
 
@@ -207,21 +221,24 @@ Using WorldClim (http://www.worldclim.org/) bioclimatic dataset at resolution of
 
 ```{r getEnvBC, echo = env.bc, include = env.bc}
 # WorldClim生物気候変数ラスターを取得する
-envs <- getDataEx(name = "worldclim", var = "bio", res = {{bcRes}}, lat = {{bcLat}}, lon = {{bcLon}})
-# 名前の変更ラスター変数
+path <- getwd()
 envRes <- {{bcRes}}
 if (envRes == 0.5) {
-  i <- grep('_', names(envs))
-  editNames <- sapply(strsplit(names(envs)[i], '_'), function(x) x[1])
-  names(envs)[i] <- editNames
+  envs <- geodata::worldclim_global(var = "bio", res = {{bcRes}}, lat = {{bcLat}}, lon = {{bcLon}}, path = path, version = "2.1")
+} else {
+  envs <- geodata::worldclim_global(var = "bio", res = {{bcRes}}, path = path, version = "2.1")
 }
+
+# 名前の変更ラスター変数
+names(envs) <- gsub(".*_", "bio", names(envs))
 i <- grep('bio[0-9]$', names(envs))
 editNames <- paste('bio', sapply(strsplit(names(envs)[i], 'bio'), function(x) x[2]), sep='0')
 names(envs)[i] <- editNames
 # 選択した変数によるサブセット
 envs <- envs[[{{bcSels}}]]
 # occグリッドセルで環境値を抽出する
-locs.vals <- raster::extract(envs[[1]], occs[, c('longitude', 'latitude')])
+locs.vals <- terra::extract(envs[[1]], occs[, c('longitude', 'latitude')])
+locs.vals <- locs.vals[, 1]
 # 環境値のない occsを削除する
 occs <- occs[!is.na(locs.vals), ]  
 ```
@@ -232,7 +249,7 @@ d.envs <- ''
 # ラスターファイルへのパスを作成する
 userRas.paths <- file.path(d.envs, {{userEnvs}})
 # ラスターファイルからラスタースタックを作成する
-envs <- raster::stack(userRas.paths)
+envs <- terra::rast(userRas.paths)
 ```
 
 
@@ -240,7 +257,7 @@ envs <- raster::stack(userRas.paths)
 
 ```{r bgSwitch, include = FALSE, eval = bg.any}
 bgType <- switch("{{bgSel}}", 'bb'='Bounding Box', 'mcp'='Minimum Convex Polygon',   
-                'ptsbuf'='Buffered Points',  'user'='User-defined')
+                'ptsbuf'='Buffered Points',  'user'='User-defined',  'bufDist'='Point geodesic buffer')
 ```
 
 ```{asis, echo = bg.any, eval = bg.any, include = bg.any}
@@ -254,19 +271,20 @@ xmax <- max(occs$longitude)
 ymin <- min(occs$latitude)
 ymax <- max(occs$latitude)
 bb <- matrix(c(xmin, xmin, xmax, xmax, xmin, ymin, ymax, ymax, ymin, ymin), ncol=2)
-bgExt <- sp::SpatialPolygons(list(sp::Polygons(list(sp::Polygon(bb)), 1)))
+bgExt <- sf::st_polygon(list(bb))
+bgExt.sf <- sf::st_sfc(bgExt, crs = 4326)
 ```
 
 ```{r bgMCP, echo = bg.mcp, include = bg.mcp}
 occs.xy <- occs[c('longitude', 'latitude')]
-sp::coordinates(occs.xy) <- ~ longitude + latitude
+#sp::coordinates(occs.xy) <- ~ longitude + latitude
 bgExt <- mcp(occs.xy)
 ```
 
 ```{r bgPtBufs, echo = bg.ptbuf, include = bg.ptbuf}
 # バッファリング用の空間点群を作成します
 occs.xy <- occs[c('longitude', 'latitude')]
-sp::coordinates(occs.xy) <- ~ longitude + latitude
+#sp::coordinates(occs.xy) <- ~ longitude + latitude
 bgExt <- occs.xy
 ```
 
@@ -279,7 +297,10 @@ Read a .csv file and generate a Spatial Polygon object.
 csvPath <- ''
 # ポリゴンの座標でcsvを読み取る
 shp <- read.csv(csvPath, header = TRUE)
-bgExt <- sp::SpatialPolygons(list(sp::Polygons(list(sp::Polygon(shp)), 1)))
+
+bgExt <- sf::st_polygon(list(as.matrix(shp)))
+
+bgExt.sf <- sf::st_sfc(bgExt, crs = 4326)
 ```
 
 ```{asis, echo = bg.userShp, eval = bg.userShp, include = bg.userShp}
@@ -290,31 +311,120 @@ User study extent name is `r "{{bgUserShpName}}"`. User study extent path is `r 
 # 注意: シェープファイルを含むフォルダへのパスを指定します
 d.bg <- ''
 # ポリゴンの座標でcsvを読み取る
-bgExt <- rgdal::readOGR(d.bg, "{{bgUserShpName}}")
+#bgExt <- rgdal::readOGR(d.bg, "{{bgUserShpName}}")
+bgExt <- terra::vect(paste0(d.bg, "{{bgUserShpName}}",".shp"))
 ```
 
 ```{asis, echo = bg.bufWid, eval = bg.bufWid, include = bg.bufWid}
 Buffer size of the study extent polygon defined as `r {{bgBuf}}` degrees.
 ```
 
-```{r bgufWid, echo = bg.bufWid, include = bg.bufWid}
-bgExt <- rgeos::gBuffer(bgExt, width = {{bgBuf}})
+```{asis, echo = bg.bufDist & bg.Geodesic, eval = bg.bufDist , include = bg.bufDist}
+Buffer size of the study extent polygon defined as `r {{bgBufDist}}` km.
+```
+
+```{r bgufWid, echo = bg.bufWid & bg.ptbuf, inclue = bg.bufWid}
+#bgExt <- rgeos::gBuffer(bgExt, width = {{bgBuf}})
+eckertIV <- "+proj=eck4 +lon_0=0 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs"
+occs.sp <- sf::st_as_sf(bgExt, coords = c("longitude", "latitude"), crs = 4326)
+occs.sf <- sf::st_transform(occs.sp, crs = eckertIV)
+bgExt <- sf::st_buffer(occs.sf, dist = {{bgBuf}} * 111000) |>
+  sf::st_union() |>
+  sf::st_sf() |>
+  sf::st_transform(crs = 4326)
+```
+
+```{r bgufWid1, echo = bg.bufWid & bg.mcp, include = bg.bufWid}
+#bgExt <- rgeos::gBuffer(bgExt, width = {{bgBuf}})
+bgExt <- terra::buffer(terra::vect(bgExt), width = {{bgBuf}})
+```
+
+```{r bgufWid2, echo = bg.bufWid & (bg.bb | bg.userCSV), include = bg.bufWid}
+bgExt_vect <- sf::st_transform(bgExt.sf , crs = 3100)
+bgExt <- sf::st_buffer(bgExt_vect, dist = {{bgBuf}} * 111000)|>
+  sf::st_transform(crs = 4326)|>
+  terra::vect()
+```
+
+```{r bgufWid3, echo = bg.bufWid & bg.userShp, include = bg.bufWid}
+#bgExt <- rgeos::gBuffer(bgExt, width = {{bgBuf}})
+bgExt <- terra::buffer(bgExt, width = {{bgBuf}})
 ```
 
 ```{asis, echo = bg.any, eval = bg.any, include = bg.any}
 Mask environmental variables by `r bgType`, and take a random sample of background values from the study extent. As the sample is random, your results may be different than those in the session. If there seems to be too much variability in these background samples, try increasing the number from 10,000 to something higher (e.g. 50,000 or 100,000). The better your background sample, the less variability you'll have between runs.
 ```
 
+```{r bgGeodesic, echo = bg.Geodesic, include = bg.Geodesic}
+occs.xy <- occs[c('longitude', 'latitude')]
+occs.sf <- sf::st_as_sf(occs.xy, coords = c("longitude", "latitude"), crs = 4326)
+#JGD2000 / UTM zone 54N - EPSG:3100
+occs.sf <- sf::st_transform(occs.sf, crs = 3100)
+
+bgExt <- sf::st_buffer(occs.sf, dist = {{bgBufDist}} * 1000) %>%
+  sf::st_sf() %>%
+  sf::st_transform(crs = 4326)
+```
+
 ```{r envsMask, echo = bg.any, include = bg.any}
 # 背景範囲の形状で環境ラスターをトリミングします
-envsBgCrop <- raster::crop(envs, bgExt)
+envsBgCrop <- terra::crop(envs, bgExt)
 # トリミングされたラスターから背景範囲の形状をマスクします
-envsBgMsk <- raster::mask(envsBgCrop, bgExt)
-# ランダムな背景ポイントのサンプル
-bg.xy <- dismo::randomPoints(envsBgMsk, {{bgPtsNum}})
+envsBgMsk <- terra::mask(envsBgCrop, bgExt)
+```
+
+```{r tgbGbif, echo = bg.tgb, include = bg.tgb}
+# 対象群背景法による背景ポイントのサンプル(対象種と同属の在データをGBIFから抽出)
+tgb_bbox <- sf::st_bbox(bgExt)
+taxonKey <- rgbif::name_backbone(name = occs$genus[1], rank = "genus")$usageKey
+tgb <- rgbif::occ_search(
+       taxonKey = taxonKey,
+       hasCoordinate = TRUE,
+       limit = {{bgPtsNum}} *4,
+       decimalLatitude = paste(tgb_bbox[[2]], tgb_bbox[[4]], sep = ","),
+       decimalLongitude = paste(tgb_bbox[[1]], tgb_bbox[[3]], sep = ","),
+       fields = c("decimalLongitude", "decimalLatitude")
+   )
+tgb.xy <- tgb$data %>% dplyr::select(decimalLongitude, decimalLatitude) %>%
+  dplyr::filter(!is.na(decimalLatitude) & !is.na(decimalLongitude))
+names(tgb.xy) <- c('longitude', 'latitude')
+tgb.xy <- as.data.frame(tgb.xy) 
+tgb.xy <- tgb.xy[!duplicated(tgb.xy),]
+bgExt.sf <- sf::st_as_sf(bgExt)
+sf::st_crs(bgExt.sf) <- 4326
+tgb.xy <- tgb.xy[sf::st_intersects(bgExt.sf, sf::st_as_sf(tgb.xy,coords = c("longitude", "latitude"), crs = 4326))[[1]],]
+if(dim(tgb.xy)[1] > {{bgPtsNum}}){
+   bgXY <- dplyr::sample_n(tbl = tgb.xy,size = {{bgPtsNum}})
+} else {
+   bgXY <- tgb.xy
+}
+bg.xy <- bgXY
+```
+
+
+```{r tgbEnvMask, echo = (bg.envmask | bg.user), include = bg.envmask}
+# ランダムな背景ポイントのサンプリング
+bg.xy <- terra::spatSample(envsBgMsk, size = {{bgPtsNum}},method = "random", xy = TRUE)
 # 行列出力をデータフレームに変換します
-bg.xy <- as.data.frame(bg.xy)  
+bg.xy <- as.data.frame(bg.xy)[,c("x","y")]
 colnames(bg.xy) <- c("longitude", "latitude")
+```
+
+```{r UsergpCsv, echo = bg.usergp, include = bg.usergp}
+# ユーザー指定の背景点
+# 注意：CSVファイルを含むフォルダーへのパスを指定してください。
+d.user_gp <- ''
+# 背景点の座標でcsvを読み取る
+# input CSV file with columns 'longitude', 'latitude'
+f.xy <- read.csv(d.user_gp, header = TRUE)
+f.xy$latitude <- as.numeric(f.xy$latitude)
+f.xy$longitude <- as.numeric(f.xy$longitude)
+f.xy <- f.xy[c('longitude', 'latitude')]
+f.xy <- as.data.frame(f.xy)
+colnames(f.xy) <- c("longitude", "latitude")
+terra::crs(bgExt) <- "EPSG:4326"
+f.xy <- f.xy[!is.na(f.xy$longitude) & !is.na(f.xy$latitude),]
+bg.xy <- f.xy[sf::st_intersects(sf::st_as_sf(bgExt,crs = 4326),sf::st_as_sf(f.xy,coords = c("longitude", "latitude"),crs = 4326))[[1]],]
 ```
 
 
@@ -340,24 +450,30 @@ group.data <- ENMeval::get.block(occ = occs.xy, bg = bg.xy)
 
 ```{r check1Grp, echo = part.cb1, include = part.cb1}
 occs.xy <- occs[c('longitude', 'latitude')]
-group.data <- ENMeval::get.checkerboard1(occ = occs.xy, env = envsBgMsk,
+group.data <- ENMeval::get.checkerboard(occ = occs.xy, env = envsBgMsk,
                                          bg = bg.xy, aggregation.factor = {{aggFact}})
 ```
 
 ```{r check2Grp, echo = part.cb2, include = part.cb2}
 occs.xy <- occs[c('longitude', 'latitude')]
-group.data <- ENMeval::get.checkerboard2(occ = occs.xy, env = envsBgMsk,
-                                         bg = bg.xy, aggregation.factor = {{aggFact}})
+bg.xy.clean <- bg.xy[complete.cases(terra::extract(envsBgMsk, bg.xy)), ]
+occs.xy.clean <- occs.xy[complete.cases(terra::extract(envsBgMsk, occs.xy)), ]
+group.data <- ENMeval::get.checkerboard(occ = occs.xy.clean, env = envsBgMsk,
+                                         bg = bg.xy.clean, aggregation.factor = {{aggFact}})
 ```
 
 ```{r jackGrp, echo = part.jack, include = part.jack}
 occs.xy <- occs[c('longitude', 'latitude')]
-group.data <- ENMeval::get.jackknife(occ = occs.xy, bg = bg.xy)
+bg.xy.clean <- bg.xy[complete.cases(terra::extract(envsBgMsk, bg.xy)), ]
+occs.xy.clean <- occs.xy[complete.cases(terra::extract(envsBgMsk, occs.xy)), ]
+group.data <- ENMeval::get.jackknife(occ = occs.xy.clean, bg = bg.xy.clean)
 ```
 
 ```{r randGrp, echo = part.rand, include = part.rand}
 occs.xy <- occs[c('longitude', 'latitude')]
-group.data <- ENMeval::get.randomkfold(occ = occs.xy, bg = bg.xy, kfolds = {{kfolds}})
+bg.xy.clean <- bg.xy[complete.cases(terra::extract(envsBgMsk, bg.xy)), ]
+occs.xy.clean <- occs.xy[complete.cases(terra::extract(envsBgMsk, occs.xy)), ]
+group.data <- ENMeval::get.randomkfold(occ = occs.xy.clean, bg = bg.xy.clean, kfolds = {{kfolds}})
 ```
 
 ```{r  echo = part.any, include = part.any}
@@ -375,9 +491,9 @@ You selected the `r "{{enmSel}}"` model.
 ```
 
 ```{r bioclim, echo = mod.bioclim, include = mod.bioclim}
-e <- ENMeval::ENMevaluate(occs = occs.xy, envs = envsBgMsk, bg = bg.xy,
+e <- ENMeval::ENMevaluate(occs = as.data.frame(occs.xy.clean), envs = envsBgMsk, bg = bg.xy.clean,
                           algorithm = "bioclim", partitions = "user",
-                          occ.grp = occs.grp, bg.grp = bg.grp)
+                          user.grp = list(occs.grp = occs.grp, bg.grp = bg.grp))
 # 結果データフレームとモデルのリストを解凍します
 evalTbl <- e@results
 evalMods <- e@models
@@ -389,10 +505,10 @@ evalPreds <- e@predictions
 # テストする正則化乗数のベクトルを定義します
 rms <- seq({{rms1}}, {{rms2}}, {{rmsStep}})
 # 選択したすべてのパラメータ設定に対してモデル構築を反復処理する
-e <- ENMeval::ENMevaluate(occ = occs.xy, env = envsBgMsk, bg.coords = bg.xy,
-                          RMvalues = rms, fc = {{fcs}}, method = 'user', 
-                          occ.grp = occs.grp, bg.grp = bg.grp, 
-                          clamp = {{clamp}}, algorithm = "{{algMaxent}}")
+e <- ENMeval::ENMevaluate(occs = as.data.frame(occs.xy.clean), envs = envsBgMsk, bg = bg.xy.clean,
+                          tune.args = list(fc = {{fcs}}, rm = rms), partitions = 'user', 
+                          user.grp = list(occs.grp = occs.grp, bg.grp = bg.grp), 
+                          algorithm = "{{algMaxent}}")
 
 # 結果データフレーム、モデルのリスト、および生の予測のRasterStackを解凍します
 evalTbl <- e@results
@@ -408,7 +524,7 @@ Below are some visualizations of your modeling analysis results.
 
 ```{r respCurvJav, echo = viz.resp & '{{algMaxent}}' == "maxent.jar", include = viz.resp}
 # 係数がゼロ以外の環境変数の応答曲線を表示する
-dismo::response(evalMods[["{{modSel}}"]], var = {{mxNonZeroCoefs}})
+predicts::partialResponse(evalMods[["{{modSel}}"]], var = {{mxNonZeroCoefs}})
 ```
 
 ```{r respCurvMaxnet, echo = viz.resp & '{{algMaxent}}' == "maxnet", include = viz.resp, warning = F, message = F}
@@ -453,26 +569,26 @@ pred <- predictMaxnet(mod, envsBgMsk, type = 'cloglog', clamp = {{clamp}})
 
 ```{r maxentLog, echo = viz.pred.log & alg.maxent, include = viz.pred.log}
 # ロジスティック予測の生成
-pred <- dismo::predict(mod, envsBgMsk, args = c("outputformat=logistic"))
+pred <- predicts::predict(envsBgMsk, mod, args = c("outputformat=logistic"), clamp = rvs$clamp, na.rm = TRUE)
 ```
 
 ```{r maxentCll, echo = viz.pred.cll & alg.maxent, include = viz.pred.cll}
 # cloglog予測を生成する
-pred <- dismo::predict(mod, envsBgMsk, args = c("outputformat=cloglog")) 
+pred <- predicts::predict(envsBgMsk, mod, args = c("outputformat=cloglog"), clamp = rvs$clamp, na.rm = TRUE) 
 ```
 
 ```{r, echo = viz.pred.thr, include = viz.pred.thr}
 # 在データグリッドセルの予測値を取得する
-occPredVals <- raster::extract(pred, occs.xy)
+occPredVals <- terra::extract(pred, occs.xy)
 # 最小トレーニングプレゼンスしきい値を定義する
-thr <- thresh(occPredVals, "{{comp7.thresh}}")
+thr <- thresh(occPredVals[[2]], "{{comp7.thresh}}")
 # しきい値モデルの予測
 pred <- pred > thr
 ```
 
 ```{r, echo = viz.pred, include = viz.pred}
 # モデル予測をプロットする
-plot(pred)
+terra::plot(pred)
 ```
 
 ```{asis, echo = pj.any, eval = pj.any, include = pj.any}
@@ -483,7 +599,8 @@ You selected to project your model. First define a polygon with the coordinates 
 ```{r projSel, echo = pj.any, include = pj.any}
 projCoords <- data.frame(x = {{occsPjX}},
                          y = {{occsPjY}})
-projPoly <- sp::SpatialPolygons(list(sp::Polygons(list(sp::Polygon(projCoords)), ID=1)))
+
+projPoly <- sf::as_Spatial(sf::st_sfc(sf::st_polygon(list(as.matrix(projCoords))), crs = 4326))
 ```
 
 ```{asis, echo = pj.area & alg.maxnet, eval = pj.area, include = pj.area}
@@ -492,55 +609,55 @@ Now use crop and mask the predictor variables by projPoly, and use the maxnet.pr
 ```
 
 ```{r projAreaMaxnet.raw, echo = pj.area & alg.maxnet & viz.pred.raw, include = pj.area}
-predsProj <- raster::crop(envs, projPoly)
-predsProj <- raster::mask(predsProj, projPoly)
+predsProj <- terra::crop(envs, projPoly)
+predsProj <- terra::mask(predsProj, terra::vect(sf::st_as_sf(projPoly)))
 proj <- predictMaxnet(mod, predsProj, type = 'exponential', clamp = {{clamp}})
 ```
 
 ```{r projAreaMaxnet.log, echo = pj.area & alg.maxnet & viz.pred.log, include = pj.area}
-predsProj <- raster::crop(envs, projPoly)
-predsProj <- raster::mask(predsProj, projPoly)
+predsProj <- terra::crop(envs, projPoly)
+predsProj <- terra::mask(predsProj, terra::vect(sf::st_as_sf(projPoly)))
 proj <- predictMaxnet(mod, predsProj, type = 'logistic', clamp = {{clamp}})
 ```
 
 ```{r projAreaMaxnet.cll, echo = pj.area & alg.maxnet & viz.pred.cll, include = pj.area}
-predsProj <- raster::crop(envs, projPoly)
-predsProj <- raster::mask(predsProj, projPoly)
+predsProj <- terra::crop(envs, projPoly)
+predsProj <- terra::mask(predsProj, terra::vect(sf::st_as_sf(projPoly)))
 proj <- predictMaxnet(mod, predsProj, type = 'cloglog', clamp = {{clamp}})
 ```
 
 ```{asis, echo = pj.area & alg.maxent, eval = pj.area, include = pj.area}
 ### ニッチモデルを新しい空間に投影する
-Now use crop and mask the predictor variables by projPoly, and use the dismo::predict() function to predict the values for the new extent based on the model selected.
+Now use crop and mask the predictor variables by projPoly, and use the predicts::predict() function to predict the values for the new extent based on the model selected.
 ```
 
 ```{r projAreaMaxent.raw, echo = pj.area & alg.maxent & viz.pred.raw, include = pj.area}
-predsProj <- raster::crop(envs, projPoly)
-predsProj <- raster::mask(predsProj, projPoly)
-proj <- dismo::predict(mod, predsProj, args = c("outputformat=raw"))
+predsProj <- terra::crop(envs, projPoly)
+predsProj <- terra::mask(predsProj, terra::vect(sf::st_as_sf(projPoly)))
+proj <- predicts::predict(predsProj, mod, args = c("outputformat=raw"),clamp = rvs$clamp, na.rm = TRUE)
 ```
 
 ```{r projAreaMaxent.log, echo = pj.area & alg.maxent & viz.pred.log, include = pj.area}
-predsProj <- raster::crop(envs, projPoly)
-predsProj <- raster::mask(predsProj, projPoly)
-proj <- dismo::predict(mod, predsProj, args = c("outputformat=logistic"))
+predsProj <- terra::crop(envs, projPoly)
+predsProj <- terra::mask(predsProj, terra::vect(sf::st_as_sf(projPoly)))
+proj <- predicts::predict(predsProj, mod, args = c("outputformat=logistic"), clamp = rvs$clamp, na.rm = TRUE)
 ```
 
 ```{r projAreaMaxent.cll, echo = pj.area & alg.maxent & viz.pred.cll, include = pj.area}
-predsProj <- raster::crop(envs, projPoly)
-predsProj <- raster::mask(predsProj, projPoly)
-proj <- dismo::predict(mod, predsProj, args = c("outputformat=cloglog"))
+predsProj <- terra::crop(envs, projPoly)
+predsProj <- terra::mask(predsProj, terra::vect(sf::st_as_sf(projPoly)))
+proj <- predicts::predict(predsProj, mod, args = c("outputformat=cloglog"), clamp = rvs$clamp, na.rm = TRUE)
 ```
 
 ```{asis, echo = pj.area & mod.bioclim, eval = pj.area, include = pj.area}
 ### ニッチモデルを新しい空間に投影する
-Now use crop and mask the predictor variables by projPoly, and use the dismo::predict() function to predict the values for the new extent based on the model selected.
+Now use crop and mask the predictor variables by projPoly, and use the predicts::predict() function to predict the values for the new extent based on the model selected.
 ```
 
 ```{r projAreaBioclim, echo = pj.area & mod.bioclim, include = pj.area}
-predsProj <- raster::crop(envs, projPoly)
-predsProj <- raster::mask(predsProj, projPoly)
-proj <- dismo::predict(mod, predsProj, useC = FALSE)
+predsProj <- terra::crop(envs, projPoly)
+predsProj <- terra::mask(predsProj, terra::vect(sf::st_as_sf(projPoly)))
+proj <- predicts::predict(predsProj, mod)
 ```
 
 ```{asis, echo = pj.time & alg.maxnet, eval = pj.time, include = pj.time}
@@ -550,24 +667,24 @@ Now download the future climate variables chosen with *Wallace*, crop and mask t
 
 ```{asis, echo = pj.time & alg.maxent, eval = pj.time, include = pj.time}
 ### ニッチモデルを新しい時間に投影する
-Now download the future climate variables chosen with *Wallace*, crop and mask them by projPoly, and use the dismo::predict() function to predict the values for the new time based on the model selected.
+Now download the future climate variables chosen with *Wallace*, crop and mask them by projPoly, and use the predicts::predict() function to predict the values for the new time based on the model selected.
 ```
 
 ```{asis, echo = pj.time & mod.bioclim, eval = pj.time, include = pj.time}
 ### ニッチモデルを新しい時間に投影する
-Now download the future climate variables chosen with *Wallace*, crop and mask them by projPoly, and use the dismo::predict() function to predict the values for the new time based on the model selected.
+Now download the future climate variables chosen with *Wallace*, crop and mask them by projPoly, and use the predicts::predict() function to predict the values for the new time based on the model selected.
 ```
 
 ```{r pTNet, echo = pj.time, include = pj.time}
-envsFuture <- getDataEx("CMIP5", var = "bio", res = {{bcRes}}, rcp = {{pjRCP}}, model = "{{pjGCM}}", year = {{pjYear}})
+envsFuture <- geodata::cmip6_world(var = "bio", res = {{bcRes}}, ssp = {{pjRCP}}, model = "{{pjGCM}}", time = "{{pjYear}}", path = getwd())
 
-predsProj <- raster::crop(envsFuture, projPoly)
-predsProj <- raster::mask(predsProj, projPoly)
+predsProj <- terra::crop(envsFuture, projPoly)
+predsProj <- terra::mask(predsProj, terra::vect(sf::st_as_sf(projPoly)))
 
 # 将来の気候変数名の名前を変更する
 names(predsProj) <- paste0('bio', sprintf("%02d", 1:19))
 # 気候変数を選択する
-predsProj <- raster::subset(predsProj, names(envs))
+predsProj <- terra::subset(predsProj, names(envs))
 ```
 
 ```{r pTNet.raw, echo = pj.time & alg.maxnet & viz.pred.raw, include = pj.time}
@@ -587,22 +704,22 @@ proj <- predictMaxnet(mod, predsProj, type = 'cloglog', clamp = {{clamp}})
 
 ```{r pTEnt.raw, echo = pj.time & alg.maxent & viz.pred.raw, include = pj.time}
 # モデルを予測する
-proj <- dismo::predict(mod, predsProj, args = c('outputformat=raw'))
+proj <- predicts::predict(predsProj, mod, args = c('outputformat=raw'), clamp = rvs$clamp, na.rm = TRUE)
 ```
 
 ```{r pTEnt.log, echo = pj.time & alg.maxent & viz.pred.log, include = pj.time}
 # モデルを予測する
-proj <- dismo::predict(mod, predsProj, args = c('outputformat=logistic'))
+proj <- predicts::predict(predsProj, mod, args = c('outputformat=logistic'), clamp = rvs$clamp, na.rm = TRUE)
 ```
 
 ```{r pTEnt.cll, echo = pj.time & alg.maxent & viz.pred.cll, include = pj.time}
 # モデルを予測する
-proj <- dismo::predict(mod, predsProj, args = c('outputformat=cloglog'))
+proj <- predicts::predict(predsProj, mod, args = c('outputformat=cloglog'), clamp = rvs$clamp, na.rm = TRUE)
 ```
 
 ```{r pTBioclim, echo = pj.time & mod.bioclim, include = pj.time}
 # モデルを予測する
-proj <- dismo::predict(mod, predsProj, useC = FALSE)
+proj <- predicts::predict(predsProj, mod)
 ```
 
 ```{asis, echo = pj.user & alg.maxnet, eval = pj.user, include = pj.user}
@@ -612,12 +729,12 @@ Now download the future climate variables chosen with *Wallace*, crop and mask t
 
 ```{asis, echo = pj.user & alg.maxent, eval = pj.user, include = pj.user}
 ### ニッチモデルを新しい時間に投影する
-Now download the future climate variables chosen with *Wallace*, crop and mask them by projPoly, and use the dismo::predict() function to predict the values for the new time based on the model selected.
+Now download the future climate variables chosen with *Wallace*, crop and mask them by projPoly, and use the predicts::predict() function to predict the values for the new time based on the model selected.
 ```
 
 ```{asis, echo = pj.user & mod.bioclim, eval = pj.user, include = pj.user}
 ### ニッチモデルを新しい時間に投影する
-Now download the future climate variables chosen with *Wallace*, crop and mask them by projPoly, and use the dismo::predict() function to predict the values for the new time based on the model selected.
+Now download the future climate variables chosen with *Wallace*, crop and mask them by projPoly, and use the predicts::predict() function to predict the values for the new time based on the model selected.
 ```
 
 ```{r getprojectUserEnvs, echo = pj.user, include = pj.user}
@@ -626,10 +743,10 @@ d.penvs <- ''
 # ラスターファイルへのパスを作成する
 pUserRas.paths <- file.path(d.penvs, {{rvs$projectUserEnvs[1]}})
 # ラスターファイルからラスタースタックを作成する
-pUserEnvs <- raster::stack(pUserRas.paths)
+pUserEnvs <- terra::rast(pUserRas.paths)
 
-predsProj <- raster::crop(pUserEnvs, projPoly)
-predsProj <- raster::mask(predsProj, projPoly)
+predsProj <- terra::crop(pUserEnvs, projPoly)
+predsProj <- terra::mask(predsProj, terra::vect(sf::st_as_sf(projPoly)))
 ```
 
 ```{r pUNet.raw, echo = pj.user & alg.maxnet & viz.pred.raw, include = pj.user}
@@ -649,36 +766,36 @@ proj <- predictMaxnet(mod, predsProj, type = 'cloglog', clamp = {{clamp}})
 
 ```{r pUEnt.raw, echo = pj.user & alg.maxent & viz.pred.raw, include = pj.user}
 # モデルを予測する
-proj <- dismo::predict(mod, predsProj, args = c('outputformat=raw'))
+proj <- predicts::predict(predsProj, mod, args = c('outputformat=raw'), clamp = rvs$clamp, na.rm = TRUE)
 ```
 
 ```{r pUEnt.log, echo = pj.user & alg.maxent & viz.pred.log, include = pj.user}
 # モデルを予測する
-proj <- dismo::predict(mod, predsProj, args = c('outputformat=logistic'))
+proj <- predicts::predict(predsProj, mod, args = c('outputformat=logistic'), clamp = rvs$clamp, na.rm = TRUE)
 ```
 
 ```{r pUEnt.cll, echo = pj.user & alg.maxent & viz.pred.cll, include = pj.user}
 # モデルを予測する
-proj <- dismo::predict(mod, predsProj, args = c('outputformat=cloglog'))
+proj <- predicts::predict(predsProj, mod, args = c('outputformat=cloglog'), clamp = rvs$clamp, na.rm = TRUE)
 ```
 
 ```{r pUBioclim, echo = pj.user & mod.bioclim, include = pj.user}
 # モデルを予測する
-proj <- dismo::predict(mod, predsProj, useC = FALSE)
+proj <- predicts::predict(predsProj, mod)
 ```
 
 ```{r, echo = pj.thr, include = pj.thr}
 # 在データグリッドセルの予測値を取得する
-occPredVals <- raster::extract(proj, occs.xy)
-# 最小トレーニングプレゼンスしきい値を定義する
-thr <- thresh(occPredVals, "{{comp8.thresh}}")
+# occPredVals <- terra::extract(pred, occs.xy)
+# # 最小トレーニングプレゼンスしきい値を定義する
+# thr <- thresh(occPredVals, "{{comp8.thresh}}")
 # しきい値モデルの予測
 proj <- proj > thr
 ```
 
 ```{r, echo = pj.any, include = pj.any}
 # モデル予測をプロットする
-plot(proj)
+terra::plot(proj)
 ```
 
 ```{asis, echo = pj.mess, eval = pj.mess, include = pj.mess}
@@ -691,8 +808,8 @@ To visualize the environmental difference between the occurrence localities and 
 # 在地点と背景から環境値を抽出します-これらはモデルに入った値でした
 names(bg.xy) <- names(occs.xy)
 all.xy <- rbind(occs.xy, bg.xy)
-occEnvVals <- raster::extract(envs, all.xy)
+occEnvVals <- terra::extract(envs, all.xy, ID=FALSE)
 # これらの値を投影範囲（envsMsk）と比較します
-proj.mess <- suppressWarnings(dismo::mess(predsProj, occEnvVals))
-plot(proj.mess)
+proj.mess <- suppressWarnings(predicts::mess(predsProj, occEnvVals))
+terra::plot(proj.mess)
 ```

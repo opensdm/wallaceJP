@@ -29,7 +29,8 @@ respPlots_MOD <- function(input, output, session, rvs) {
           if (rvs$algMaxent == "maxnet") {
             maxnet::response.plot(modCur, v = rvs$envSel, type = "cloglog")
           } else if (rvs$algMaxent == "maxent.jar") {
-            dismo::response(modCur, var = rvs$envSel)
+            #dismo::response(modCur, var = rvs$envSel)
+            predicts::partialResponse(modCur, var = rvs$envSel)
           }
           dev.off()
         })
@@ -41,7 +42,8 @@ respPlots_MOD <- function(input, output, session, rvs) {
             if (rvs$algMaxent == "maxnet") {
               plot(modCur, type = "cloglog", vars = rvs$mxNonZeroCoefs)
             } else if (rvs$algMaxent == "maxent.jar") {
-              dismo::response(modCur, var = rvs$mxNonZeroCoefs)
+              #dismo::response(modCur, var = rvs$mxNonZeroCoefs)
+              predicts::partialResponse(modCur, var = rvs$mxNonZeroCoefs)
             }
             dev.off()
           })
@@ -50,7 +52,8 @@ respPlots_MOD <- function(input, output, session, rvs) {
     if (rvs$algMaxent == "maxnet") {
       maxnet::response.plot(modCur, v = rvs$envSel, type = "cloglog")
     } else if (rvs$algMaxent == "maxent.jar") {
-      dismo::response(modCur, var = rvs$envSel)
+      #dismo::response(modCur, var = rvs$envSel)
+      predicts::partialResponse(modCur, var = rvs$envSel)
     }
   })
 }

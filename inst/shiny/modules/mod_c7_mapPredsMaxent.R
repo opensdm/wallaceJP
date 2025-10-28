@@ -22,17 +22,17 @@ mapPredsMaxent_MOD <- function(input, output, session, rvs) {
     
     # initially pick raw prediction
     predSel <- rvs$modPreds[[rvs$modSel]]
-    raster::crs(predSel) <- raster::crs(rvs$bgMsk)
+    terra::crs(predSel) <- terra::crs(rvs$bgMsk)
     names(predSel) <- paste0(rvs$modSel, '_raw')
     
-    if (is.na(raster::crs(predSel))) {
+    if (is.na(terra::crs(predSel))) {
       rvs %>% writeLog(type = "error", i18n$t("Model prediction raster has undefined coordinate reference system (CRS), and thus cannot be mapped. This is likely due to undefined CRS's for input rasters. Please see guidance text for module 'User-specified Environmental Data' in component 'Obtain Environmental Data' for more details."))
       return()
     }
     
     # argument for predict function
     pargs <- rvs$comp7.type
-    
+    #browser()
     if (input$predType == 'logistic') {
       # Generate logistic predictions for each model
       if (is.null(rvs$modPredsLog)) {
@@ -41,17 +41,21 @@ mapPredsMaxent_MOD <- function(input, output, session, rvs) {
             sapply(rvs$mods, function(x) predictMaxnet(x, rvs$bgMsk, type=pargs, 
                                                                        clamp = rvs$clamp))
           } else if (rvs$algMaxent == "maxent.jar") {
-            sapply(rvs$mods, function(x) dismo::predict(x, rvs$bgMsk, 
-                                                        args = paste0("outputformat=", 
-                                                                      rvs$comp7.type)))
+            # sapply(rvs$mods, function(x) dismo::predict(x, rvs$bgMsk, 
+            #                                             args = paste0("outputformat=", 
+            #                                                           rvs$comp7.type)))
+            sapply(rvs$mods, function(x) predicts::predict(rvs$bgMsk, x, args = paste0("outputformat=",input$predType),
+                                                           clamp = rvs$clamp, na.rm = TRUE))
           }
-          rvs$modPredsLog <- raster::stack(logPredsList)
+          # rvs$modPredsLog <- raster::stack(logPredsList)
+          rvs$modPredsLog <- terra::rast(logPredsList)
           names(rvs$modPredsLog) <- names(rvs$modPreds)
         })
       }
       predSel <- rvs$modPredsLog[[rvs$modSel]]
-      raster::crs(predSel) <- raster::crs(rvs$bgMsk)
+      terra::crs(predSel) <- terra::crs(rvs$bgMsk)
       names(predSel) <- paste0(rvs$modSel, '_log')
+      #browser()
     } else if (input$predType == 'cloglog') {
       # Generate cloglog predictions for each model
       if (is.null(rvs$modPredsCLL)) {
@@ -60,16 +64,18 @@ mapPredsMaxent_MOD <- function(input, output, session, rvs) {
             sapply(rvs$mods, function(x) predictMaxnet(x, rvs$bgMsk, type = pargs, 
                                                                        clamp = rvs$clamp))
           } else if (rvs$algMaxent == "maxent.jar") {
-            sapply(rvs$mods, function(x) dismo::predict(x, rvs$bgMsk, 
-                                                        args = paste0("outputformat=", 
-                                                                      rvs$comp7.type)))
+            # sapply(rvs$mods, function(x) dismo::predict(x, rvs$bgMsk, 
+            #                                             args = paste0("outputformat=", 
+            #                                                           rvs$comp7.type)))
+            sapply(rvs$mods, function(x) predicts::predict(rvs$bgMsk, x, args = paste0("outputformat=",input$predType),
+                                                           clamp = rvs$clamp, na.rm = TRUE))
           }
-          rvs$modPredsCLL <- raster::stack(cllPredsList)
+          rvs$modPredsCLL <- terra::rast(cllPredsList)
           names(rvs$modPredsCLL) <- names(rvs$modPreds)
         })  
       }
       predSel <- rvs$modPredsCLL[[rvs$modSel]]
-      raster::crs(predSel) <- raster::crs(rvs$bgMsk)
+      terra::crs(predSel) <- terra::crs(rvs$bgMsk)
       names(predSel) <- paste0(rvs$modSel, '_cll')
     }
     

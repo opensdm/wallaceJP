@@ -33,8 +33,11 @@ bgExtent_MOD <- function(input, output, session, rvs) {
     # extract just coordinates
     occs.xy <- rvs$occs[c('longitude', 'latitude')]
     # make spatial pts object of original occs and preserve origID
-    occs.sp <- sp::SpatialPointsDataFrame(occs.xy, data=rvs$occs['occID'])
-    
+
+    occs.sp <- sf::st_as_sf(occs.xy, coords = c("longitude", "latitude"), crs = 4326)
+    occs.sp <- sf::as_Spatial(occs.sp)
+    # occs.sp@data <- rvs$occs['occID']
+
     # generate background extent - one grid cell is added to perimeter of each shape
     # to ensure cells of points on border are included
     if (input$bgSel == 'bb') {
@@ -43,11 +46,11 @@ bgExtent_MOD <- function(input, output, session, rvs) {
       ymin <- occs.sp@bbox[2]
       ymax <- occs.sp@bbox[4]
       bb <- matrix(c(xmin, xmin, xmax, xmax, xmin, ymin, ymax, ymax, ymin, ymin), ncol=2)
-      bgExt <- sp::SpatialPolygons(list(sp::Polygons(list(sp::Polygon(bb)), 1)))
+
+      bgExt_sf <- sf::st_sfc(sf::st_polygon(list(bb)), crs = 4326)
       msg <- i18n$t("Study extent: bounding box.")
     } else if (input$bgSel == 'mcp') {
-      bgExt <- mcp(occs.xy)
-      # bb <- xy_mcp@polygons[[1]]@Polygons[[1]]@coords
+      bgExt_sf <- mcp(occs.xy)
       msg <- i18n$t("Study extent: minimum convex polygon.")
     } else if (input$bgSel == 'ptbuf') {
       if (input$bgBuf == 0) {
@@ -59,10 +62,27 @@ bgExtent_MOD <- function(input, output, session, rvs) {
     }
     
     if (input$bgBuf > 0) {
-      bgExt <- rgeos::gBuffer(bgExt, width = input$bgBuf)
+      if (input$bgSel == 'ptbuf'){
+        eckertIV <- "+proj=eck4 +lon_0=0 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs"
+        occs.sp <- sf::st_as_sf(occs.xy, coords = c("longitude", "latitude"), crs = 4326)
+        occs.sf <- sf::st_transform(occs.sp, crs = eckertIV)
+        bgExt <- sf::st_buffer(occs.sf, dist = input$bgBuf * 111000) |>
+          sf::st_union() |>
+          sf::st_sf() |>
+          sf::st_transform(crs = 4326) |>
+          sf::as_Spatial()
+      } else {
+        bgExt_vect <- sf::st_transform(bgExt_sf , crs = 3100)
+        bgExt <- sf::st_buffer(bgExt_vect, dist = input$bgBuf * 111000)|>
+          sf::st_transform(crs = 4326) |>
+          sf::as_Spatial()
+      }
       rvs %>% writeLog(msg, i18n$t('Study extent buffered by'), input$bgBuf, i18n$t('degrees.'))
+    } else {
+      if (input$bgSel != 'ptbuf'){
+        bgExt <- sf::as_Spatial(bgExt_sf)
+      }
     }
-    
     return(bgExt)
   })
 }

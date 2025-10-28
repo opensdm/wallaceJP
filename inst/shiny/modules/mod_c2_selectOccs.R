@@ -23,15 +23,31 @@ selectOccs_MOD <- function(input, output, session, rvs) {
     occs.xy <- rvs$occs[c('longitude', 'latitude')]
     
     # make spatial pts object of original occs and preserve origID
-    pts <- sp::SpatialPointsDataFrame(occs.xy, data=rvs$occs['occID'])
+    #pts <- sp::SpatialPointsDataFrame(occs.xy, data=rvs$occs['occID'])
+    pts <- sf::st_as_sf(occs.xy, coords = c("longitude", "latitude"), crs = 4326)
     
-    newPoly <- sp::SpatialPolygons(list(sp::Polygons(list(sp::Polygon(rvs$polySelXY)), ID=rvs$polySelID)))  # create new polygon from coords
+    pts$occID <- rvs$occs$occID
     
-    intersect <- sp::over(pts, newPoly)
-    ptRemIndex <- which(is.na(intersect))
+    #newPoly <- sp::SpatialPolygons(list(sp::Polygons(list(sp::Polygon(rvs$polySelXY)), ID=rvs$polySelID)))  # create new polygon from coords
+
+    poly_matrix <- list(rvs$polySelXY)
+
+    newPoly <- sf::st_sf(geometry = sf::st_sfc(sf::st_polygon(poly_matrix)),
+                     ID = rvs$polySelID,
+                     crs = 4326
+               )
+
+
+    #intersect <- sp::over(pts, newPoly)
+    intersect <- sf::st_disjoint(pts, newPoly, sparse = FALSE)
+
+    #ptRemIndex <- which(is.na(intersect))
+
+    ptRemIndex <- which(intersect)
     
     if (length(ptRemIndex) > 0) {
-      ptRemIndex <- as.numeric(ptRemIndex)  
+      ptRemIndex <- as.numeric(ptRemIndex)
+
       remIDs <- as.numeric(pts[ptRemIndex,]$occID)
       
       occs.sel <- rvs$occs[-ptRemIndex,]

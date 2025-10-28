@@ -4,8 +4,7 @@ source("funcs/functions.R", local = TRUE)
 #   install.packages("librarian")
 #   library(librarian)
 # }
-# shelf(dismo, dplyr, DT, ENMeval, jsonlite, knitr, leaflet, leaflet.extras, raster, RColorBrewer, rmarkdown, shinyjs, sp, spocc, zip)
-
+# shelf(dismo, dplyr, DT, ENMeval, jsonlite, knitr, leaflet, leaflet.extras, raster, RColorBrewer, rmarkdown, shinyjs, sp, spocc, z
 options(shiny.maxRequestSize=5000*1024^2)
 options(timeout=60*60)
 
@@ -102,6 +101,7 @@ shinyServer(function(input, output, session) {
       updateTabsetPanel(session, 'main', selected = 'Map')
       gtext$cur_comp <- "gtext_comp4.Rmd"
       if (input$envProcSel == 'bgSel') gtext$cur_mod <- "gtext_comp4_backg.Rmd"
+      if (input$envProcSel == 'bgGeodesic') gtext$cur_mod <- "gtext_comp4_bgGeodesic.Rmd"
       if (input$envProcSel == 'bgUser') gtext$cur_mod <- "gtext_comp4_userBg.Rmd"
       
     }
@@ -291,7 +291,7 @@ shinyServer(function(input, output, session) {
                        radius = 5, color = 'red', fillColor = 'red',
                        fillOpacity = 1, weight = 2, popup = ~pop,
                        group = 'comp2') %>%
-      addLegend("bottomright", colors = c('red', 'blue'),
+      leaflet::addLegend("bottomright", colors = c('red', 'blue'),
                 title = "Occ Records", labels = c('retained', 'removed'),
                 opacity = 1, layerId = 'leg')
     shinyjs::enable("dlProcOccs")
@@ -403,19 +403,29 @@ shinyServer(function(input, output, session) {
   bgExt <- callModule(bgExtent_MOD, 'c4_bgExtent', rvs)
   
   bgShpXY <- reactive({
-    polys <- rvs$bgShp@polygons[[1]]@Polygons
-    if (length(polys) == 1) {
-      xy <- list(rvs$bgShp@polygons[[1]]@Polygons[[1]]@coords)
+    if (rvs$c4_bgsel == "bgGeodesic") {
+      polys <- sapply(rvs$bgShp@polygons, function(x) x@Polygons)
+      xy <- lapply(polys, function(x) x@coords)
     } else {
-      xy <- sapply(polys, function(x) x@coords)
+      polys <- rvs$bgShp@polygons[[1]]@Polygons
+
+      if (length(polys) == 1) {
+        xy <- list(rvs$bgShp@polygons[[1]]@Polygons[[1]]@coords)
+      } else {
+        xy <- sapply(polys, function(x) x@coords)
+      }
     }
     return(xy)
   })
   
   observeEvent(input$goBgExt, {
+    #browser()
     rvs$bgShp <- bgExt()
+    rvs$c4_bgsel <- "bgSel"
     # stop if no environmental variables
     req(rvs$envs)
+    # stop if no polygons
+    req(rvs$bgShp)
     map %>% clearShapes()
     for (shp in bgShpXY()) {
       map %>%
@@ -431,6 +441,28 @@ shinyServer(function(input, output, session) {
   
   observeEvent(input$goUserBg, {
     rvs$bgShp <- userBg()
+    rvs$c4_bgsel <- "bgUser"
+    # stop if no environmental variables
+    req(rvs$envs)
+    req(rvs$bgShp)
+    coords <- rvs$bgShp@polygons[[1]]@Polygons[[1]]@coords
+    map %>% clearShapes()
+    for (shp in bgShpXY()) {
+      map %>%
+        addPolygons(lng=shp[,1], lat=shp[,2],
+                    weight=4, color="gray", group='bgShp')  
+    }
+    map %>%
+      fitBounds(rvs$bgShp@bbox[1], rvs$bgShp@bbox[2], rvs$bgShp@bbox[3], rvs$bgShp@bbox[4])
+  })
+
+  # Background thickening: Geodesic buffer
+  bgGeodesic <- callModule(bgGeodesic_MOD, 'c4_bgGeodesic', rvs)
+  
+  observeEvent(input$goBgGeodesic, {
+    rvs$bgShp <- bgGeodesic()
+    rvs$c4_bgsel <- "bgGeodesic"
+
     # stop if no environmental variables
     req(rvs$envs)
     req(rvs$bgShp)
@@ -447,12 +479,19 @@ shinyServer(function(input, output, session) {
   
   # module Background Mask and Sample Points
   observeEvent(input$goBgMask, {
-    bgMskPts.call <- callModule(bgMskAndSamplePts_MOD, 'c4_bgMskAndSamplePts', rvs)
+    bgMskPts.call <- callModule(bgMskAndSampleBiasPts_MOD, 'c4_bgMskAndSampleBiasPts', rvs)
     bgMskPts <- bgMskPts.call()
     # stop if no background shape
     req(rvs$bgShp)
     rvs$bgMsk <- bgMskPts$msk
     rvs$bgPts <- bgMskPts$pts
+    # MAPPING - Plot the remaining occs after of removing NA
+    map %>%
+      clearMarkers() %>%
+      clearControls() %>%
+      map_plotLocs(rvs$occs) %>%
+      map_plotbgPts(rvs$bgPts) %>%
+      zoom2Occs(rvs$occs)
     shinyjs::enable('dlMskEnvs')
   })
   
@@ -465,10 +504,43 @@ shinyServer(function(input, output, session) {
       on.exit(setwd(owd))
       type <- input$bgMskFileType
       nm <- names(rvs$bgMsk)
+      #browser()
+      # raster::writeRaster(rvs$bgMsk, file.path(tmpdir, 'msk'), bylayer = TRUE,
+      #                     suffix = nm, format = type, overwrite = TRUE)
       
-      raster::writeRaster(rvs$bgMsk, file.path(tmpdir, 'msk'), bylayer = TRUE,
-                          suffix = nm, format = type, overwrite = TRUE)
-      ext <- switch(type, raster = 'grd', ascii = 'asc', GTiff = 'tif')
+      # terra::writeRaster(
+      #   rvs$bgMsk,
+      #   filename = file.path(tmpdir, 'msk'),
+      #   overwrite = TRUE,
+      #   filetype = type,
+      #   names = nm
+      # )
+      # 
+      # ext <- switch(type, raster = 'grd', ascii = 'asc', GTiff = 'tif')
+      
+      ext <- switch(type,
+                    "raster" = "grd",
+                    "ascii"  = "asc",
+                    "GTiff"  = "tif",
+                    "default" = "tif"
+      )
+      
+      # レイヤー数を取得
+      n_layers <- terra::nlyr(rvs$bgMsk)
+      
+      # 各レイヤーを個別に保存
+      for (i in seq_len(n_layers)) {
+        lyr <- rvs$bgMsk[[i]]
+        lyr_name <- nm[i]
+        filename <- file.path(tmpdir, paste0("msk_", lyr_name, ".", ext))
+        
+        terra::writeRaster(
+          lyr,
+          filename = filename,
+          overwrite = TRUE,
+          filetype = type
+        )
+      }
       
       fs <- paste0('msk_', nm, '.', ext)
       if (ext == 'grd') {
@@ -480,7 +552,7 @@ shinyServer(function(input, output, session) {
     contentType = "application/zip"
   )
   
-  
+
   ############################################# #
   ### COMPONENT 5: PARTITION OCCURRENCE DATA ####
   ############################################# #
@@ -730,17 +802,18 @@ shinyServer(function(input, output, session) {
     # MAPPING
     if (rvs$comp7.thr != 'noThresh') {
       rasPal <- c('gray', 'blue')
-      map %>% addLegend("bottomright", colors = c('gray', 'blue'),
+      map %>% leaflet::addLegend("bottomright", colors = c('gray', 'blue'),
                         title = "Thresholded Suitability", labels = c(i18n$t("predicted absence"), i18n$t("predicted presence")),
                         opacity = 1, layerId = 'leg')
     } else {
       rasCols <- c("#2c7bb6", "#abd9e9", "#ffffbf", "#fdae61", "#d7191c")
       legendPal <- colorNumeric(rev(rasCols), rvs$predCurVals, na.color='transparent')
       rasPal <- colorNumeric(rasCols, rvs$predCurVals, na.color='transparent')
-      map %>% addLegend("bottomright", pal = legendPal, title = i18n$t("Predicted Suitability"),
+      map %>% leaflet::addLegend("bottomright", pal = legendPal, title = i18n$t("Predicted Suitability"),
                         values = rvs$predCurVals, layerId = 'leg',
                         labFormat = reverseLabels(2, reverse_order=TRUE))
     }
+    #browser()
     map %>% 
       clearMarkers() %>% clearImages() %>% clearShapes() %>%
       map_plotLocs(rvs$occs) %>%
@@ -757,26 +830,17 @@ shinyServer(function(input, output, session) {
   # download for model predictions (restricted to background extent)
   output$dlPred <- downloadHandler(
     filename = function() {
-      ext <- switch(input$predFileType, raster = 'zip', ascii = 'asc', GTiff = 'tif', png = 'png')
+      ext <- switch(input$predFileType, GTiff = 'tif', png = 'png')
       paste0(names(rvs$predCur), '.', ext)},
     content = function(file) {
-      # browser()
+      #browser()
       if (require(rgdal)) {
         if (input$predFileType == 'png') {
           png(file)
-          raster::image(rvs$predCur)
+          terra::image(rvs$predCur)
           dev.off()
-        } else if (input$predFileType == 'raster') {
-          fileName <- names(rvs$predCur)
-          tmpdir <- tempdir()
-          raster::writeRaster(rvs$predCur, file.path(tmpdir, fileName), format = input$predFileType, overwrite = TRUE)
-          owd <- setwd(tmpdir)
-          fs <- paste0(fileName, c('.grd', '.gri'))
-          zip::zip(zipfile=file, files=fs)
-          setwd(owd)
         } else {
-          r <- raster::writeRaster(rvs$predCur, file, format = input$predFileType, overwrite = TRUE)
-          file.rename(r@file@name, file)
+          terra::writeRaster(rvs$predCur, file, filetype = input$predFileType, overwrite = TRUE)
         }
       } else {
         rvs %>% writeLog(i18n$t("Please install the rgdal package before downloading rasters."))
@@ -832,7 +896,7 @@ shinyServer(function(input, output, session) {
     req(rvs$projCur)
     rvs$projCurVals <- getVals(rvs$projCur, rvs$comp7.type)
     rvs$comp8.pj <- 'time'
-    raster::crs(rvs$projCur) <- raster::crs(rvs$bgMsk)
+    terra::crs(rvs$projCur) <- terra::crs(rvs$bgMsk)
     rasVals <- c(rvs$predCurVals, rvs$projCurVals)
     rasCols <- c("#2c7bb6", "#abd9e9", "#ffffbf", "#fdae61", "#d7191c")
     map %>% comp8_map(rvs$projCur, rvs$polyPjXY, bgShpXY, rasVals, 
@@ -858,7 +922,7 @@ shinyServer(function(input, output, session) {
     req(rvs$projCur)
     rvs$projCurVals <- getVals(rvs$projCur, rvs$comp7.type)
     rvs$comp8.pj <- 'user'
-    raster::crs(rvs$projCur) <- raster::crs(rvs$bgMsk)
+    terra::crs(rvs$projCur) <- terra::crs(rvs$bgMsk)
     rasVals <- c(rvs$predCurVals, rvs$projCurVals)
     rasCols <- c("#2c7bb6", "#abd9e9", "#ffffbf", "#fdae61", "#d7191c")
     map %>% comp8_map(rvs$projCur, rvs$polyPjXY, bgShpXY, rasVals, 
@@ -915,25 +979,16 @@ shinyServer(function(input, output, session) {
   # download for model predictions (restricted to background extent)
   output$dlProj <- downloadHandler(
     filename = function() {
-      ext <- switch(input$projFileType, raster = 'zip', ascii = 'asc', GTiff = 'tif', PNG = 'png')
+      ext <- switch(input$projFileType, GTiff = 'tif', png = 'png')
       paste0(names(rvs$projCur), '.', ext)},
     content = function(file) {
       if (require(rgdal)) {
         if (input$projFileType == 'png') {
           png(file)
-          raster::image(rvs$projCur)
+          terra::image(rvs$projCur)
           dev.off()
-        } else if (input$projFileType == 'raster') {
-          fileName <- names(rvs$projCur)
-          tmpdir <- tempdir()
-          raster::writeRaster(rvs$projCur, file.path(tmpdir, fileName), format = input$projFileType, overwrite = TRUE)
-          owd <- setwd(tmpdir)
-          fs <- paste0(fileName, c('.grd', '.gri'))
-          zip::zip(zipfile=file, files=fs)
-          setwd(owd)
         } else {
-          r <- raster::writeRaster(rvs$projCur, file, format = input$projFileType, overwrite = TRUE)
-          file.rename(r@file@name, file)
+          terra::writeRaster(rvs$projCur, file, filetype = input$projFileType, overwrite = TRUE)
         }
       } else {
         rvs %>% writeLog(i18n$t("Please install the rgdal package before downloading rasters."))
@@ -970,6 +1025,8 @@ shinyServer(function(input, output, session) {
         polyPjX <- polyPjY <- NULL
       }
       bcSels <- printVecAsis(rvs$bcSels)
+      #browser()
+      bgBufDist <- ifelse(is.null(rvs$comp4.bufDist) || is.na(rvs$comp4.bufDist), 0, rvs$comp4.bufDist)
       exp <- knitr::knit_expand(text = readLines("Rmd/userReport.Rmd",encoding = "UTF-8"), 
                                 curWD = curWD, 
                                 # comp 1
@@ -991,6 +1048,7 @@ shinyServer(function(input, output, session) {
                                 # comp 4
                                 bgSel = rvs$comp4.shp, 
                                 bgBuf = rvs$comp4.buf, 
+                                bgBufDist = rvs$comp4.bufDist,
                                 #bgUserCSVname = rvs$bgUserCSVname,
                                 #bgUserCSVpath = rvs$bgUserCSVpath,
                                 bgUserShpPath = rvs$bgUserShpPar$dsn, 

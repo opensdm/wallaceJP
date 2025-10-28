@@ -472,3 +472,70 @@ convert_list_cols <- function(x) {
 write_csv_robust <- function(x, ...) {
   write.csv(convert_list_cols(x), ...)
 }
+
+#' @title penvs_geodesic Geodesic buffer for unprojected points
+#' @description This function helps in creating geodesic buffers of points represented by longitude and latitude coordinates.
+#'
+#' @details
+#' x
+#'
+#' @param occs data frame of cleaned or processed occurrences obtained from components occs: Obtain occurrence data or, poccs: Process occurrence data
+#' @param geodBuf numeric. Radius of buffer in meters
+# @param by_point logical. Whether or not to do buffers by point. If FALSE, the default, buffer polygons that overlap will be dissolved to obtain an only feature. Default = 100.
+# @param wrap_antimeridian logical. Whether or not to wrap buffers in the antimeridian when they overpass it.
+#' @param logger  Stores all notification messages to be displayed in the Log Window of Wallace GUI. Insert the logger reactive list here for running in shiny,
+#' otherwise leave the default NULL
+#' @param spN data frame of cleaned occurrences obtained from component occs: Obtain occurrence data. Used to obtain species name for logger messages
+# @keywords
+#'
+#' @examples
+#' spN<-"Panthera onca"
+#' occs <-  occs_queryDb(spName = spN, occDb = "gbif", occNum = 100)
+#' occs <- as.data.frame(occs[[1]]$cleaned)
+#' envs <- envs_worldclim(bcRes = 10, bcSel = list(TRUE,TRUE,TRUE,TRUE,TRUE), doBrick = TRUE)
+#' bgExt <- penvs_bgExtent(occs, bgSel = 'bounding box', bgBuf = 0.5,spN=spN)
+#' bgMask <- penvs_bgMask(occs, envs, bgExt,spN=spN)
+#' bgsample <- penvs_bgSample(occs, bgMask, bgPtsNum=1000,spN=spN)
+#'
+#' @return A SpatialPolygons object of buffered points. Final projection is WGS84 (EPSG:4326).
+#' @author Name <e-mail>
+#' @author Name <e-mail>
+# @note
+#' @seealso \code{\link{penvs_bgMask}} , \code{\link{penvs_bgExtent}}  \code{\link{penvs_userBgExtent}}, \code{\link{penvs_drawBgExtent}}, \code{\link[dismo]{randomPoints}}
+# @references
+# @aliases - a list of additional topic names that will be mapped to
+# this documentation when the user looks them up from the command
+# line.
+# @family - a family name. All functions that have the same family tag will be linked in the documentation.
+
+#' @export
+
+penvs_geodesic <- function(occs, geodBuf, logger = logger, spN = sp) {
+  # Warnings
+  # input
+  occs.xy <- occs[c('longitude', 'latitude')]
+  # sp::coordinates(occs.xy) <- ~ longitude + latitude
+  # occs.sp <- sp::SpatialPointsDataFrame(occs.xy, data = occs['occID'])
+  
+  occs.sp <- sf::st_as_sf(occs.xy, coords = c("longitude", "latitude"), crs = 4326)
+  occs.sp <- sf::as_Spatial(occs.sp)
+  # occs.sp@data <- occs['occID']
+  
+  # ### run modified rangemap function (from stack exchange)
+  # withProgress(message = i18n$t("Calculating Geobuffer points ..."),{
+  #   gbuf.laea <- geobuffer_points(data = occs.sp@coords, radius = geodBuf*1000, n_segments = 100, by_point = TRUE)
+  # })
+  withProgress(message = i18n$t("Calculating Geobuffer points ..."),{
+    # EPSG:32652 = UTM zone 52N / JGD2000 / UTM zone 54N - EPSG:3100
+    occs.sf <- sf::st_transform(sf::st_as_sf(occs.sp), crs = 3100)
+    gbuf.laea <- sf::st_buffer(occs.sf, dist = geodBuf*1000 ) %>%
+      sf::st_sf() %>%
+      sf::st_transform(crs = 4326) %>%
+      sf::as_Spatial()
+  })
+  # output model object
+  return(gbuf.laea)
+  # write log message
+  logger%>% writeLog(i18n$t("Geobuffer points calculated successfully for "), (spName(spN)), ".")
+  
+}

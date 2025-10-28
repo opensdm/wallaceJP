@@ -18,7 +18,7 @@ bioclim_MOD <- function(input, output, session, rvs) {
     
     e <- ENMeval::ENMevaluate(occs = occs.xy, envs = rvs$bgMsk, bg = rvs$bgPts,
                               algorithm = "bioclim", partitions = "user",
-                              occ.grp = rvs$occsGrp, bg.grp = rvs$bgGrp)
+                              user.grp = list(occs.grp = rvs$occsGrp, bg.grp = rvs$bgGrp))
 
     rvs %>% writeLog(i18n$t("BIOCLIM ran successfully and output evaluation results."))
       

@@ -3,7 +3,7 @@ title: "tab4_background"
 output: html_document
 ---
 
-### **モジュール:** ***分析範囲の選択***
+### **モジュール:** ***背景加重（Background thickening）***
 
 **背景**
 
@@ -13,12 +13,7 @@ output: html_document
 
 このモジュールでは、Rパッケージの(空間オブジェクトを定義する)`sf` および(空間オブジェクトをバッファする)`terra`の重要な機能を使用します。
 
-このモジュールでは、*Open SDM* では、研究対象地域を定義する方法の選択肢が３つあり、1)在データの位置を囲む長方形の「境界ボックス」、2)在データの位置を囲んで描く最小面積の凸￢形状(最小凸多角形)、または3)在地点の周りのバッファです。
-
-分析範囲を設定する方法を選択(***Step 1***)した後、*Open SDM* は環境データからユーザーが指定した数の背景地点をサンプリングします(=pixels; ***Step 2***)。
-設定された分析範囲内から背景地点をサンプリングする方法は３つあり、１つは、分析範囲の中から背景地点の***ランダム サンプリング****です。２つ目は対象種群背景法（Target Group Background; Phillips et al. 2009）で、*wallace*にはなく*Open SDM*でのみ実装されている方法です。この方法では、対象種と同じ属の在データをGBIFで検索し、その中からユーザーが指定した数の地点をBackgroundとしてこれ以降の分析に使用します。このような選び方は、同じような調査方法で得られた近縁種の在データが存在する場所は、対象種も調査されただろうという仮定に基づきます。３つ目のオプションとして、ユーザーは指定した地点をアップロードすることができます。
-
-サンプリングする背景地点数について、指定した数が選択した背景範囲での環境の幅に対して少ない場合、環境条件の一部がサンプルから漏れることがあります。そのような状態では、最終モデルで使用した変数によっては、背景範囲全体について予測を行う際に環境的外挿が必要になることがあります(**モデル構築**、**可視化**、**投影**の各手順を参照。Guevara et al. 2018)。
+背景荷重（Background thickening）法では、バッファー内の在地点数密度に応じた数の背景地点を設定します（Vollering et al. 2019）。バッファー距離はユーザーが指定します。バッファーを投影面で生成するのではなく、地球の曲率を考慮して発生させるため（geodetic buffer)、広域でもより正確な分析を行うことができます。
 
 
 **引用文献**
@@ -41,8 +36,9 @@ Merow, C., Smith, M. J., & Silander, J. A. (2013). A practical guide to MaxEnt f
 
 Peterson A. T., Soberon J., Pearson R. G., Anderson R. P., Martinez-Meyer E., Nakamura M., Araujo M. B. (2011). Modeling Ecological Niches. In: *Ecological Niches and Geographic Distributions*. Princeton, New Jersey: Monographs in Population Biology, 49. Princeton University Press.
 
-Phillips S.J., Dudik M., Elith J., Graham C.H., Lehmann A., Leathwick J. and Ferrier S. (2009), Sample selection bias and presence-only distribution models: implications for background and pseudo-absence data. Ecological Applications, 19: 181-197
-
 Saupe, E. E., Barve, V., Myers, C. E., Soberon, J., Barve, N., Hensz, C. M., ... & Lira-Noriega, A. (2012). Variation in niche and distribution model performance: the need for a priori assessment of key causal factors. *Ecological Modelling*. 237: 11-22.
 
 VanDerWal, J., Shoo, L. P., Graham, C., & Williams, S. E. (2009). Selecting pseudo-absence data for presence-only distribution modeling: How far should you stray from what you know?. *Ecological Modelling*. 220: 589-594.
+
+Vollering, J., Halvorsen, R., Auestad, I. and Rydgren, K. (2019). Bunching up the background betters bias in species distribution models. *Ecography*. 42: 1717-1727. 
+

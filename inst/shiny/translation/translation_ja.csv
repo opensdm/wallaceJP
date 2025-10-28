@@ -195,7 +195,7 @@ Download Maxent evaluation plot (.png),Maxent評価プロット（.png）をダ�
 No statistic selected for plotting.,プロットに用いる統計量が選択されていません。
 BIOCLIM ran successfully and output evaluation results.,BIOCLIMは正常に実行され、評価結果が出力されました。
 Upload Occurrence CSV,在地点のCSVファイルをアップロード
-"Please input CSV file with columns ""name"", ""longitude"", ""latitude"".",「name」、「longitude」、「latitude」の列を含むCSVファイルを入力してください。
+"Please input CSV file with columns ""name"", ""longitude"", ""longitude"".",「name」、「longitude」、「longitude」の列を含むCSVファイルを入力してください。
 Project to new area or time first.,新しい時空間範囲への投影をまず行います。
 Generating MESS map...,MESSマップの生成中…
 Generated MESS map for present.,現在のMESSマップを生成しました。
@@ -281,7 +281,7 @@ No records with coordinates found in,座標を持つレコードが見つかり�
 for,for
 .,。
 Querying,検索中
-"Please input CSV file with columns 'name', 'longitude', 'latitude'.",「name」、「longitude」、「latitude」の列を含むCSVファイルを入力してください。
+"Please input CSV file with columns 'name', 'longitude', 'latitude'.",「name」、「longitude」、「longitude」の列を含むCSVファイルを入力してください。
 User-specified CSV file,ユーザー指定のCSVファイル
 with total of,合計で
 records with coordinates was uploaded.,座標付きのレコードがアップロードされました。
@@ -295,7 +295,7 @@ at,解像度
  arcmin resolution., 分。
 Study extent buffered by,バッファ後の分析範囲（バッファサイズ
 degrees.,度）。
-Random background points sampled (n =,ランダムにサンプリングされた背景地点（n =
+"Random background points sampled (n =",ランダムにサンプリングされた背景地点（n =
 ).,)。
 "), but only ",）、 しかし
 % of points (n = ,% のポイント (n =
@@ -325,3 +325,20 @@ Projected to,投影対象：
 Using map center,Using map center:
 Removing occurrences with occID = ,削除された在データの occID = 
 Module: Project to User-Specified Environments,モジュール: ユーザー指定の環境データへ投影
+Geodesic buffer for unprojected points,背景加重法(background thickening)での背景地点サンプリング
+Calculate geodesic buffer with a constant distance,一定距離で測地線バッファを計算する
+Point geodesic buffer in km,キロメートル単位での測地線バッファ距離の指定
+"Upload background points with field order: longitude, latitude (.csv)","背景点（longitude,latitude）をCSVファイルでアップロードする"
+Target group background,対象群背景法（Target group background）
+Envs Mask,ランダムサンプリング
+Module: Geodesic buffer for unprojected points,モジュール: 背景加重法(background thickening)
+Background thickening: Geodesic buffer,背景加重法（Background thickening)
+"Background points uploaded (n =",背景点がアップロードされました。(n = 
+"Target group background points requested (n =",ターゲットグループの背景点が要求されました。(n =
+"Target group background points sampled (n =",ターゲットグループの背景点がランダムに取得されました。(n = 
+"Calculating Geobuffer points ...",ジオバッファー点群の計算...
+"Geodesic buffer for species calculated.",種に対して測地線バッファが計算された。バッファサイズ 
+"Random background points requested (n =",背景点のランダムサンプリングが要求されました（n =
+"km.",キロメートル。
+"Upload background points (.csv)",背景点(.csv)をアップロード
+"Background points files not uploaded.",背景点ファイルがアップロードされなかった
