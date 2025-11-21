@@ -1,9 +1,11 @@
 library(shiny)
 library(shiny.i18n)
 
+withCallingHandlers({
 language_value <- "ja"
 i18n <- Translator$new(translation_csvs_path = "translation")
 i18n$set_translation_language(language_value)
+}, warning = function(w) invokeRestart("muffleWarning"))
 
 ## -------------------------------------------------------------------- ##
 ## Define functions

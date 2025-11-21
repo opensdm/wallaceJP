@@ -47,13 +47,13 @@ projectUserEnvs_MOD <- function(input, output, session, rvs) {
     rvs$projectUserEnvs <- input$projectUserEnvs
     
     withProgress(message = i18n$t("Reading in rasters..."), {
-      penvs <- raster::stack(input$projectUserEnvs$datapath)
+      penvs <- terra::rast(input$projectUserEnvs$datapath)
       names(penvs) <- fileNameNoExt(input$projectUserEnvs$name)
     })
 
     # Check if the filesresolutions are the same that envs()
-    if (!identical(round(raster::res(rvs$envs)[1]*60,1),
-                   round(raster::res(penvs)[1]*60,1))) {
+    if (!identical(round(terra::res(rvs$envs)[1]*60,1),
+                   round(terra::res(penvs)[1]*60,1))) {
       rvs %>%
         writeLog(type = 'error',"Raster files don't have same resolutions.")
       return()
@@ -61,12 +61,12 @@ projectUserEnvs_MOD <- function(input, output, session, rvs) {
     
     rvs %>% writeLog(i18n$t("Environmental predictors: User input."))
     
-    if (is.na(raster::crs(penvs))) {
+    if (is.na(terra::crs(penvs))) {
       rvs %>% writeLog(type = "warning", i18n$t("Input rasters have undefined coordinate reference system (CRS). Mapping functionality in components Visualize Model Results and Project Model will not work. If you wish to map rasters in these components, please define their projections and upload again. See guidance text in this module for more details."))
     }
     
         # create new spatial polygon from coordinates
-    newPoly <- sp::SpatialPolygons(list(sp::Polygons(list(sp::Polygon(rvs$polyPjXY)), ID=rvs$polyPjID)))  
+    newPoly <- sf::as_Spatial(sf::st_sfc(sf::st_polygon(list(rvs$polyPjXY)), crs = 4326))  
     
     # concatanate coords to a single character
     xy.round <- round(rvs$polyPjXY, digits = 2)
@@ -86,22 +86,22 @@ projectUserEnvs_MOD <- function(input, output, session, rvs) {
     
     
     withProgress(message = i18n$t("Clipping environmental data to current extent..."), {
-      pjtMsk <- raster::crop(penvs, newPoly)
-      pjtMsk <- raster::mask(pjtMsk, newPoly)
+      pjtMsk <- terra::crop(penvs, newPoly)
+      pjtMsk <- terra::mask(pjtMsk, terra::vect(sf::st_as_sf(newPoly)))
     })
     
     modCur <- rvs$mods[[rvs$modSel]]
     
     withProgress(message = (i18n$t("Projecting to new time...")), {
       if (rvs$comp6 == 'bioclim') {
-        modProjTime <- dismo::predict(modCur, pjtMsk, useC = FALSE)
+        modProjTime <- predicts::predict(pjtMsk, modCur)
       } else if (rvs$comp6 == 'maxent') {
         if (rvs$algMaxent == "maxnet") {
           if (rvs$comp7.type == "raw") {pargs <- "exponential"} else {pargs <- rvs$comp7.type}
           modProjTime <- predictMaxnet(modCur, pjtMsk, type = pargs, clamp = rvs$clamp)
         } else if (rvs$algMaxent == "maxent.jar") {
           pargs <- paste0("outputformat=", rvs$comp7.type)
-          modProjTime <- dismo::predict(modCur, pjtMsk, args = pargs)
+          modProjTime <- predicts::predict(pjtMsk, modCur, args = pargs, clamp = rvs$clamp, na.rm = TRUE)
         }
       }
       
