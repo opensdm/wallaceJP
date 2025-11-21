@@ -36,6 +36,15 @@ userOccs_MOD <- function(input, output, session, rvs) {
     # remove duplicates
     uoccs.dups <- duplicated(uoccs %>% dplyr::select(longitude, latitude))
     uoccs <- uoccs[!uoccs.dups,]
+    
+    # 文字化けや不正文字を削除
+    uoccs[] <- lapply(uoccs, function(col) {
+      if (is.character(col)) {
+        col <- iconv(col, from = "UTF-8", to = "UTF-8", sub = "")
+        col <- gsub("[^[:print:]]", "", col)
+      }
+      col
+    })
       
     if (nrow(uoccs) == 0) {
       rvs %>% writeLog(type = 'warning', i18n$t('No records with coordinates found in'), 

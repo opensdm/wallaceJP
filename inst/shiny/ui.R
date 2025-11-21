@@ -6,6 +6,7 @@ for (f in list.files('./modules')) {
 }
 
 # Define UI for application
+withCallingHandlers({
 shinyUI(tagList(
   shinyjs::useShinyjs(),
   navbarPage(theme=bslib::bs_theme(version = 3, 
@@ -425,3 +426,4 @@ shinyUI(tagList(
              )
   )
 ))
+}, warning = function(w) invokeRestart("muffleWarning"))

@@ -122,13 +122,13 @@ bgMskAndSampleBiasPts_MOD <- function(input, output, session, rvs) {
           }
           #bgXY <- try(dismo::randomPoints(bgMask, input$bgPtsNum,))
           #bgXY <- terra::spatSample(bgMask, size = input$bgPtsNum, method = "random", as.point = TRUE, xy = TRUE)
-          valid_cells <- which(!is.na(terra::values(bgMask$bio01)))
+          valid_cells <- which(!is.na(terra::values(bgMask[names(bgMask)[1]])))
           if (input$bgPtsNum > length(valid_cells)) {
             sampled_cells <-valid_cells
           } else {
             sampled_cells <- sample(valid_cells, input$bgPtsNum)
           }
-          bgXY <- terra::xyFromCell(bgMask$bio01, sampled_cells)
+          bgXY <- terra::xyFromCell(bgMask[names(bgMask)[1]], sampled_cells)
           # if(class(bgXY)[1] == "try-error"){
           #   rvs %>% writeLog(type = "error", i18n$t("generated random points < 0.1 requested number"))
           #   return()

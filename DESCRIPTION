@@ -34,6 +34,7 @@ Imports:
  dplyr,
  DT (>= 0.4),
  ecospat,
+ predicts,
  ENMeval (>= 2.0.5.2),
  jsonlite,
  leaflet.extras,
