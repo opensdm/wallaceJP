@@ -4,6 +4,8 @@
 
 これは国立研究開発法人国立環境研究所のOpen SDMプロジェクトにより作成された、wallace (v1.1.3-1)の日本語訳版です。インターフェースの日本語化に加え、将来予測時の環境変数として30arcminの高解像度データやユーザ指定のデータを使用可能とする改良を行っています。本パッケージの詳細およびインストール方法については、A-PLATウェブサイト掲載資料 (https://adaptation-platform.nies.go.jp/map/open_sdm.html) をご覧下さい。
 
+また、トラブル時には以下もご覧ください。https://github.com/opensdm/wallaceJP/wiki/%E3%81%86%E3%81%BE%E3%81%8F%E3%82%A4%E3%83%B3%E3%82%B9%E3%83%88%E3%83%BC%E3%83%AB%E3%81%A7%E3%81%8D%E3%81%AA%E3%81%84%E5%A0%B4%E5%90%88%E3%81%AE%E5%AF%BE%E5%87%A6%E6%96%B9%E6%B3%95
+
 *Wallace* is a modular platform for reproducible modeling of species niches and distributions, written in R. The application guides users through a complete analysis, from the acquisition of data to visualizing model predictions on an interactive map, thus bundling complex workflows into a single, streamlined interface.
 
 
